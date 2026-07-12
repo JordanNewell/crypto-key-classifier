@@ -1,0 +1,9 @@
+{
+  "_source": "https://docs.sui.io/develop/cryptography and https://aptos.dev/network/blockchain/accounts",
+  "_note": "Sui and Aptos both use 0x + 64 hex (32 bytes). STRUCTURALLY IDENTICAL — cannot distinguish. Validator flags as ambiguous between SUI (BLAKE2b of pubkey) and APT (SHA3-256 of pubkey).",
+  "sui_address_algo": "BLAKE2b of pubkey (scheme-flagged)",
+  "aptos_address_algo": "SHA3-256 of pubkey",
+  "length_hex": 64,
+  "length_with_0x": 66,
+  "invalid": ["0xabc", "not a sui/aptos address", "0xZZZZ"]
+}
