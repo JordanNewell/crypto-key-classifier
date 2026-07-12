@@ -15,6 +15,7 @@ from ckc.models import Candidate, Match
 from ckc.preprocessor import preprocess
 from ckc.repairs import MAX_CANDIDATES, encoding_variants, ocr_substitutions
 from ckc.validators import all_validators
+from ckc.validators.base import Validator
 
 
 @dataclass
@@ -86,7 +87,7 @@ def classify(raw: str, config: Config | None = None) -> list[Match]:
     return matches
 
 
-def _validator_chain_codes(validator) -> set[str]:
+def _validator_chain_codes(validator: Validator) -> set[str]:
     """Get all chain codes a validator can produce (for filtering)."""
     chain = getattr(validator, "chain", "")
     if chain == "BTC_FAMILY":

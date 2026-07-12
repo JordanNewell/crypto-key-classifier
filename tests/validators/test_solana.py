@@ -1,5 +1,5 @@
-from ckc.validators.solana import SolanaValidator
 from ckc.models import Candidate
+from ckc.validators.solana import SolanaValidator
 
 
 def _cand(s: str) -> Candidate:
@@ -24,7 +24,10 @@ def test_solana_address_min_length():
 
 def test_invalid_rejected():
     v = SolanaValidator()
-    assert v.validate(_cand("0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318")) is None
+    assert (
+        v.validate(_cand("0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318"))
+        is None
+    )
     assert v.validate(_cand("too short")) is None
 
 

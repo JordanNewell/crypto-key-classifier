@@ -21,9 +21,10 @@ from ckc.reporter import render_json, render_rich, render_terse
 def _ensure_utf8_stdout() -> None:
     """Force UTF-8 on stdout/stderr so unicode glyphs (✓, →, •) render on Windows."""
     for stream in (sys.stdout, sys.stderr):
-        if hasattr(stream, "reconfigure"):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
             try:
-                stream.reconfigure(encoding="utf-8", errors="replace")
+                reconfigure(encoding="utf-8", errors="replace")
             except (ValueError, OSError):
                 pass
 
@@ -36,7 +37,9 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("inputs", nargs="*", help="input string(s) to classify")
     p.add_argument("--file", "-f", help="read inputs from file (one per line)")
-    p.add_argument("--rich", action="store_true", help="rich multi-line output (default for 1 input)")
+    p.add_argument(
+        "--rich", action="store_true", help="rich multi-line output (default for 1 input)"
+    )
     p.add_argument("--terse", action="store_true", help="one-line output (default for 2+ inputs)")
     p.add_argument("--json", dest="as_json", action="store_true", help="JSON output")
     p.add_argument("--no-mask", action="store_true", help="show full private keys (DANGEROUS)")
