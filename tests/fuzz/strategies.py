@@ -131,15 +131,10 @@ def stellar_account_strategy() -> SearchStrategy[tuple[str, str]]:
 
 def polkadot_address_strategy() -> SearchStrategy[tuple[str, str]]:
     """Generate valid Polkadot SS58 addresses."""
-    import base58
-
-    from ckc.validators.base import blake2b
+    from ckc.validators.polkadot import ss58_encode
     def make(_) -> tuple[str, str]:
         pubkey = _random_bytes(32)
-        payload = b"\x00" + pubkey  # prefix 0 = Polkadot
-        checksum = blake2b(b"SS58PRE" + payload, digest_size=64)[:2]
-        full = payload + checksum
-        return ("DOT", base58.b58encode(full).decode("ascii"))
+        return ("DOT", ss58_encode(0, pubkey))
     return st.builds(make, st.none())
 
 
