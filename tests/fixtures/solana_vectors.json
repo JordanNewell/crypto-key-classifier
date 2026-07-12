@@ -1,0 +1,17 @@
+{
+  "_source": "https://solana.com/docs/technologies/accounts and web3.js test fixtures",
+  "addresses_valid": [
+    "dDCQNQXeMSaKwBPPnYiM6QXVi3PjDTW154H6pgKVmYc",
+    "11111111111111111111111111111111",
+    "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932"
+  ],
+  "private_keys_base58": [
+    "5Kb8...3MaT_PLACEHOLDER_DO_NOT_USE"
+  ],
+  "invalid": [
+    "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318",
+    "this is not a solana address",
+    ""
+  ]
+}
