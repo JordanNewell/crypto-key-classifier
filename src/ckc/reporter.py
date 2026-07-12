@@ -14,7 +14,8 @@ from ckc.models import Match
 
 def mask_key(s: str, key_type: str, mask_private_keys: bool = True) -> str:
     """Mask private keys by default. Addresses are public — never masked."""
-    if not mask_private_keys or key_type != "private-key":
+    # Both "private-key" and "mnemonic" are sensitive and should be masked
+    if not mask_private_keys or key_type not in {"private-key", "mnemonic"}:
         return s
     if len(s) <= 8:
         return "***"
@@ -105,9 +106,13 @@ def render_json(
 
 def _match_to_dict(m: Match, mask_private_keys: bool = True) -> dict[str, object]:
     d = asdict(m)
-    if mask_private_keys and m.key_type == "private-key" and d.get("cross_chain_alternates"):
+    if (
+        mask_private_keys
+        and m.key_type in {"private-key", "mnemonic"}
+        and d.get("cross_chain_alternates")
+    ):
         d["cross_chain_alternates"] = [
-            (chain, mask_key(addr, "private-key", True))
+            (chain, mask_key(addr, m.key_type, True))
             for chain, addr in d["cross_chain_alternates"]
         ]
     return d
@@ -115,6 +120,6 @@ def _match_to_dict(m: Match, mask_private_keys: bool = True) -> dict[str, object
 
 def _infer_key_type(matches: list[Match]) -> str:
     """Infer key type from matches for masking decisions."""
-    if matches and matches[0].key_type == "private-key":
-        return "private-key"
+    if matches and matches[0].key_type in {"private-key", "mnemonic"}:
+        return matches[0].key_type
     return "address"
