@@ -22,6 +22,7 @@ dev = [
     "pytest-snapshot>=0.9",
     "pyright>=1.1.350",
     "ruff>=0.6",
+    "hypothesis>=6.100",
 ]
 
 [project.scripts]
