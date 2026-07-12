@@ -102,15 +102,28 @@ def classify(raw: str, config: Config | None = None) -> list[Match]:
 
 def _validator_chain_codes(validator: Validator) -> set[str]:
     """Get all chain codes a validator can produce (for filtering)."""
+    # Prefer validator's self-declared chains_covered
+    chains_covered = getattr(validator, "chains_covered", None)
+    if chains_covered:
+        return set(chains_covered)
+
     chain = getattr(validator, "chain", "")
     if chain == "BTC_FAMILY":
         return {"BTC", "LTC", "DOGE", "BCH"}
     if chain == "COSMOS_FAMILY":
-        return {"ATOM", "OSMO", "JUNO", "AKT", "INJ", "EVMOS", "STRD", "REGEN", "XPRT"}
+        return {"ATOM", "OSMO", "JUNO", "AKT", "INJ", "EVMOS", "STRD", "REGEN", "XPRT",
+                "SCRT", "KAVA", "CRO", "LUNA", "BAND", "UMEE", "STARS", "DVPN", "LIKE",
+                "AXL", "CRE"}
     if chain == "ETH":
-        return {"ETH", "POLYGON", "ARBITRUM", "BASE", "OPTIMISM", "BSC", "AVALANCHE"}
+        return {"ETH", "POLYGON", "ARBITRUM", "BASE", "OPTIMISM", "BSC", "AVALANCHE",
+                "GNOSIS", "LINEA", "SCROLL", "ZORA"}
     if chain == "SOL":
         return {"SOL"}
+    # Long-tail validators (single-chain or family-tag)
+    # DOT_FAMILY for Polkadot/KSM
+    if chain == "DOT_FAMILY":
+        return {"DOT", "KSM"}
+    # Single-chain validators return their own chain code
     return {chain}
 
 
