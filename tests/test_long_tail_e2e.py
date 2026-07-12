@@ -105,10 +105,10 @@ def test_e2e_near_implicit():
 
 
 def test_e2e_all_validators_discovered():
-    """All 16 validators (4 MVP + 12 long-tail) should be in the registry."""
+    """All 17 validators (4 MVP + 12 long-tail + 1 mnemonic) should be in the registry."""
     from ckc.validators import all_validators
     count = len(all_validators())
-    assert count == 16, f"expected 16 validators, got {count}"
+    assert count == 17, f"expected 17 validators, got {count}"
 
 
 def test_e2e_garbage_returns_empty():
