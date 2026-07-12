@@ -55,3 +55,17 @@ def test_cli_min_confidence_filter():
     result = _run(["--min-confidence", "80", "dDCQNQXeMSaKwBPPnYiM6QXVi3PjDTW154H6pgKVmYc"])
     # Should show "No matches" since SOL caps at 50
     assert "No matches" in result.stdout or "NO MATCH" in result.stdout
+
+
+def test_cli_help_exits_clean():
+    """Regression test: --help must not crash.
+
+    Bug: bare '%' in argparse help string caused ValueError: incomplete format
+    because argparse uses printf-style substitution. Any literal '%' must be '%%'.
+    """
+    result = _run(["--help"])
+    assert result.returncode == 0
+    assert "classify-key" in result.stdout.lower() or "usage" in result.stdout.lower()
+    # Spot-check a few flags appear
+    assert "--json" in result.stdout
+    assert "--min-confidence" in result.stdout
