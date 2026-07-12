@@ -1,0 +1,8 @@
+{
+  "_source": "https://github.com/algorandfoundation/ARCs/blob/main/ARCs/arc-0001.md",
+  "_note": "Algorand addresses are 32-byte Ed25519 pubkeys + 4-byte SHA512/256 checksum, base32 RFC4648 UNPADDED, exactly 58 chars.",
+  "length_chars": 58,
+  "encoding": "base32 rfc4648 unpadded",
+  "checksum": "first 4 bytes of SHA512/256",
+  "invalid": ["0xabc", "not an algorand address", "short"]
+}
