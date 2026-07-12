@@ -1,7 +1,6 @@
-import pytest
 
-from ckc.validators.near import NearValidator
 from ckc.models import Candidate
+from ckc.validators.near import NearValidator
 
 
 def _cand(s: str) -> Candidate:

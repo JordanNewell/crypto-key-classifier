@@ -1,8 +1,8 @@
 import pytest
 
-from ckc.validators.kaspa import KaspaValidator
-from ckc.validators.base import bech32_encode, convertbits
 from ckc.models import Candidate
+from ckc.validators.base import bech32_encode, convertbits
+from ckc.validators.kaspa import KaspaValidator
 
 
 def _cand(s: str) -> Candidate:
