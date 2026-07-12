@@ -1,4 +1,4 @@
-from ckc.pipeline import classify, Config
+from ckc.pipeline import Config, classify
 
 
 def test_clean_btc_address():

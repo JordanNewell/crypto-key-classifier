@@ -42,7 +42,8 @@ def _eip55_checksum(addr_lower: str) -> str:
     """Apply EIP-55 checksum to a lowercase hex address (no 0x prefix)."""
     hash_hex = keccak256(addr_lower.encode("ascii")).hex()
     out = []
-    for ch, hsh in zip(addr_lower, hash_hex):
+    # hash_hex is 64 chars, addr_lower is 40 chars; intentional non-strict zip
+    for ch, hsh in zip(addr_lower, hash_hex):  # noqa: B905
         if ch in "0123456789":
             out.append(ch)
         elif int(hsh, 16) >= 8:

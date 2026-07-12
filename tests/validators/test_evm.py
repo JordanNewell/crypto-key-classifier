@@ -1,5 +1,5 @@
-from ckc.validators.evm import EVMValidator
 from ckc.models import Candidate
+from ckc.validators.evm import EVMValidator
 
 
 def _cand(s: str) -> Candidate:

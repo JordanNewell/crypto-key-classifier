@@ -1,8 +1,8 @@
 import pytest
 
-from ckc.validators.cosmos import CosmosValidator
-from ckc.validators.base import bech32_encode, convertbits
 from ckc.models import Candidate
+from ckc.validators.base import bech32_encode, convertbits
+from ckc.validators.cosmos import CosmosValidator
 
 
 def _cand(s: str) -> Candidate:

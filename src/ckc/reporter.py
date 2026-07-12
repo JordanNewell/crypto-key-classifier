@@ -51,7 +51,7 @@ def render_rich(
         if show_wallets and m.wallet_compatibility:
             lines.append(f"    Wallets:      {', '.join(m.wallet_compatibility)}")
         if show_cross_chain and m.cross_chain_alternates:
-            lines.append(f"    Cross-chain:  same key as →")
+            lines.append("    Cross-chain:  same key as →")
             for chain, addr in m.cross_chain_alternates[:10]:
                 lines.append(f"      • {chain:6}  {addr}")
             if len(m.cross_chain_alternates) > 10:
@@ -97,7 +97,7 @@ def render_json(
     return json.dumps(payload, indent=2)
 
 
-def _match_to_dict(m: Match) -> dict:
+def _match_to_dict(m: Match) -> dict[str, object]:
     return asdict(m)
 
 

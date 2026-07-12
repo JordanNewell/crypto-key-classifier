@@ -1,5 +1,5 @@
 from ckc.models import Match
-from ckc.reporter import render_rich, render_terse, render_json, mask_key
+from ckc.reporter import mask_key, render_json, render_rich, render_terse
 
 
 def _match(chain="BTC", confidence=100, key_type="address", checksum="valid"):

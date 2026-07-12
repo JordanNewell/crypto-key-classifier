@@ -1,8 +1,8 @@
 import pytest
 
-from ckc.validators.btc import BTCValidator
-from ckc.validators.base import base58check_encode
 from ckc.models import Candidate
+from ckc.validators.base import base58check_encode
+from ckc.validators.btc import BTCValidator
 
 
 def _cand(s: str) -> Candidate:

@@ -9,7 +9,6 @@ from __future__ import annotations
 import importlib
 import inspect
 import pkgutil
-from typing import Iterator
 
 from ckc.validators.base import Validator
 
@@ -35,23 +34,21 @@ def _all_validator_classes() -> list[type[Validator]]:
                 and obj.__module__ == module.__name__
                 and obj.__name__ not in seen_names
             ):
-                classes.append(obj)
+                classes.append(obj)  # type: ignore[arg-type]
                 seen_names.add(obj.__name__)
     return classes
 
 
-_REGISTRY: list[Validator] | None = None
+_registry: dict[str, list[Validator]] = {}
 
 
 def all_validators() -> list[Validator]:
     """Return instantiated validators (cached)."""
-    global _REGISTRY
-    if _REGISTRY is None:
-        _REGISTRY = [cls() for cls in _all_validator_classes()]
-    return _REGISTRY
+    if "v" not in _registry:
+        _registry["v"] = [cls() for cls in _all_validator_classes()]
+    return _registry["v"]
 
 
 def reset_registry() -> None:
     """For testing: force re-discovery on next call to all_validators()."""
-    global _REGISTRY
-    _REGISTRY = None
+    _registry.clear()
