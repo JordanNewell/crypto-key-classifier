@@ -1,0 +1,8 @@
+{
+  "_source": "https://cips.cardano.org/cip/CIP-19 and CIP-5",
+  "_note": "Cardano has TWO address formats: Shelley-era bech32 (addr1/stake1/addr_test1) and Byron-era base58 (DdzFFz...). Test code generates fixtures via bech32_encode.",
+  "hrps": ["addr1", "stake1", "addr_test1"],
+  "byron_prefix": "DdzFFz",
+  "encoding": "bech32 (Shelley) or base58 (Byron)",
+  "invalid": ["0xabc", "not a cardano address"]
+}
