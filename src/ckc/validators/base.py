@@ -183,3 +183,138 @@ def bech32_validate(s: str) -> tuple[str, bytes, str] | None:
         return None
     hrp, data, spec = result
     return (hrp, bytes(data), spec)
+
+
+# =====================================================================
+# Long-tail chain helpers (Plan 2)
+# =====================================================================
+
+
+def crc16_xmodem(data: bytes) -> int:
+    """CRC16-XMODEM (used by Stellar, TON). Polynomial 0x1021, init 0x0000."""
+    crc = 0
+    for byte in data:
+        crc ^= byte << 8
+        for _ in range(8):
+            if crc & 0x8000:
+                crc = (crc << 1) ^ 0x1021
+            else:
+                crc <<= 1
+            crc &= 0xFFFF
+    return crc
+
+
+def blake2b(data: bytes, digest_size: int = 32) -> bytes:
+    """BLAKE2b hash with configurable digest size."""
+    import hashlib
+    return hashlib.blake2b(data, digest_size=digest_size).digest()
+
+
+def sha512_256(data: bytes) -> bytes:
+    """SHA-512/256 (NIST variant, used by Algorand). NOT truncated SHA-512."""
+    import hashlib
+    return hashlib.new("sha512_256", data).digest()
+
+
+# --- Monero block-encoded base58 ---
+# Monero encodes 8-byte blocks → 11 chars each. The last block carries
+# any remainder bytes (1-7), producing 2-10 chars. This is DIFFERENT from
+# Bitcoin base58check which encodes the whole payload as one integer.
+#
+# Mapping (remainder_bytes → output_chars):
+#   0 → 0, 1 → 2, 2 → 3, 3 → 5, 4 → 6, 5 → 7, 6 → 9, 7 → 10, 8 → 11
+
+_MONERO_BLOCK_SIZES: list[tuple[int, int]] = [
+    (0, 0), (2, 1), (3, 2), (5, 3), (6, 4), (7, 5), (9, 6), (10, 7), (11, 8),
+]
+
+# Indexed by remainder chars → (remainder_bytes_in_block, encoded_size)
+# Actually, we need: given how many FULL bytes remain, what encoded size?
+_MONERO_ENCODE_TABLE: dict[int, tuple[int, int]] = {
+    # remainder_bytes_in_block → (encoded_chars, bytes_consumed)
+    8: (11, 8),
+    7: (10, 7),
+    6: (9, 6),
+    5: (7, 5),
+    4: (6, 4),
+    3: (5, 3),
+    2: (3, 2),
+    1: (2, 1),
+    0: (0, 0),
+}
+
+_MONERO_DECODE_TABLE: dict[int, tuple[int, int]] = {
+    # encoded_chars → (bytes_produced, chars_consumed)
+    11: (8, 11),
+    10: (7, 10),
+    9: (6, 9),
+    7: (5, 7),
+    6: (4, 6),
+    5: (3, 5),
+    3: (2, 3),
+    2: (1, 2),
+    0: (0, 0),
+}
+
+_MONERO_BASE58_ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
+_MONERO_BASE58_INDEX = {c: i for i, c in enumerate(_MONERO_BASE58_ALPHABET)}
+
+
+def _monero_encode_block(data: bytes, from_index: int) -> tuple[str, int]:
+    """Encode a single Monero base58 block. Returns (encoded_chars, next_index)."""
+    remaining = len(data) - from_index
+    if remaining >= 8:
+        block_size = 8
+        encoded_size = 11
+    else:
+        encoded_size, block_size = _MONERO_ENCODE_TABLE[remaining]
+
+    block = data[from_index:from_index + block_size]
+    num = int.from_bytes(block, "big") if block else 0
+    chars = []
+    for _ in range(encoded_size):
+        num, rem = divmod(num, 58)
+        chars.append(_MONERO_BASE58_ALPHABET[rem])
+    return "".join(reversed(chars)), from_index + block_size
+
+
+def monero_base58_encode(data: bytes) -> str:
+    """Encode bytes using Monero's block-encoded base58 (8-byte → 11-char blocks)."""
+    result = []
+    i = 0
+    while i < len(data):
+        encoded, i = _monero_encode_block(data, i)
+        result.append(encoded)
+    return "".join(result)
+
+
+def monero_base58_decode(s: str) -> bytes:
+    """Decode Monero's block-encoded base58."""
+    full_blocks = len(s) // 11
+    remainder_chars = len(s) % 11
+
+    result = b""
+    pos = 0
+    for _ in range(full_blocks):
+        block_str = s[pos:pos + 11]
+        pos += 11
+        num = 0
+        for ch in block_str:
+            if ch not in _MONERO_BASE58_INDEX:
+                raise ValueError(f"invalid char {ch!r}")
+            num = num * 58 + _MONERO_BASE58_INDEX[ch]
+        result += num.to_bytes(8, "big")
+
+    if remainder_chars:
+        if remainder_chars not in _MONERO_DECODE_TABLE:
+            raise ValueError(f"invalid remainder char count {remainder_chars}")
+        remainder_bytes, _ = _MONERO_DECODE_TABLE[remainder_chars]
+        block_str = s[pos:pos + remainder_chars]
+        num = 0
+        for ch in block_str:
+            if ch not in _MONERO_BASE58_INDEX:
+                raise ValueError(f"invalid char {ch!r}")
+            num = num * 58 + _MONERO_BASE58_INDEX[ch]
+        result += num.to_bytes(remainder_bytes, "big")
+
+    return result

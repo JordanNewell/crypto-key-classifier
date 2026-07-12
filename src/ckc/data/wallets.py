@@ -26,6 +26,21 @@ WALLETS: dict[str, list[str]] = {
     "JUNO": ["Keplr", "Ledger"],
     "AKT": ["Keplr", "Ledger"],
     "INJ": ["Keplr", "Ledger"],
+    # Long-tail chains (Plan 2)
+    "XMR": ["Monero GUI Wallet", "Cake Wallet", "Monerujo", "Ledger"],
+    "ADA": ["Daedalus", "Yoroi", "AdaLite", "Ledger", "Trezor"],
+    "XRP": ["Xumm", "Ledger", "Trezor", "GateHub"],
+    "XLM": ["Freighter", "Lobstr", "Ledger"],
+    "TRX": ["TronLink", "Ledger", "Trezor"],
+    "XTZ": ["Temple", "Kukai", "Ledger"],
+    "DOT": ["Polkadot.js", "Ledger", "Trezor"],
+    "KSM": ["Polkadot.js", "Ledger"],
+    "TON": ["Tonkeeper", "MyTonWallet", "Ledger"],
+    "ALGO": ["Pera Wallet", "Ledger"],
+    "KAS": ["Kaspa Wallet", "Ledger"],
+    "SUI": ["Sui Wallet", "Ledger"],
+    "APT": ["Petra Wallet", "Ledger"],
+    "NEAR": ["Near Wallet", "Ledger"],
 }
 
 
