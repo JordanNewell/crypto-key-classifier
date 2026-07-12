@@ -1,0 +1,17 @@
+{
+  "_source": "https://github.com/paritytech/substrate/blob/master/primitives/core/src/crypto.rs (Ss58Address format) and https://aandds.com/blog/polkadot.html",
+  "_note": "SS58 format: prefix byte(s) + pubkey + variable Blake2b-512('SS58PRE' + payload) checksum. Test code generates fixtures via ss58_encode.",
+  "prefixes": {
+    "0": "Polkadot (DOT)",
+    "2": "Kusama (KSM)",
+    "20": "Polkadot generic",
+    "36": "Polkadot test"
+  },
+  "checksum_length_table": {
+    "payload_≤32B": "2-byte checksum",
+    "payload_33-37B": "3-byte checksum",
+    "payload_≥38B": "4-byte checksum"
+  },
+  "domain_separator": "SS58PRE (0x53533538505245)",
+  "invalid": ["0xabc", "not an ss58 address"]
+}
