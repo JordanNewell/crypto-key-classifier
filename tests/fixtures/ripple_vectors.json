@@ -1,0 +1,9 @@
+{
+  "_source": "https://xrpl.org/accounts.html#address-encoding",
+  "_note": "Ripple uses a CUSTOM base58 alphabet (different from Bitcoin). Test code generates valid XRP addresses using the custom alphabet.",
+  "prefix_byte": "0x00",
+  "length_chars": "25-35",
+  "always_starts_with": "r",
+  "alphabet": "rpshnaf39wBUDNEGHJKLM4PQRST7VWXYZ2bcdeCg65jkm8oFqi1tuvAxyz",
+  "invalid": ["0xabc", "not a ripple address", "Tinvalid"]
+}
