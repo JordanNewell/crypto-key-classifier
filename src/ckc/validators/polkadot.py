@@ -36,7 +36,9 @@ _PREFIX_TO_CHAIN: dict[int, str] = {
 }
 
 # SS58 addresses use base58 charset, length range covers most common cases
-_SS58_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{45,48}$")
+# (35-byte decoded = 33 payload + 2 checksum, or 36 bytes = 33 payload + 3 checksum)
+# Base58 encoding varies in length due to leading zero compression
+_SS58_RE = re.compile(r"^[1-9A-HJ-NP-Za-km-z]{45,49}$")
 
 
 def _ss58_checksum_length(payload_len: int) -> int:
