@@ -1,0 +1,17 @@
+{
+  "_source": "https://eips.ethereum.org/EIPS/eip-55 and ethereum.org docs",
+  "addresses_valid_eip55": [
+    "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed",
+    "0xfB6916095ca1df60bB79Ce92cE3Ea74c37c5d359",
+    "0xdbF03B407c01E7cD3CBea99509d93f8DDDC8C6FB"
+  ],
+  "private_keys_valid": [
+    "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318"
+  ],
+  "l2_chains": ["Polygon", "Arbitrum", "Base", "Optimism", "BSC", "Avalanche"],
+  "invalid": [
+    "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAe",
+    "0xZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ",
+    "0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAedEXTRA"
+  ]
+}
