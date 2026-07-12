@@ -1,0 +1,9 @@
+{
+  "_source": "https://nomicon.io/DataStructures/Account.html",
+  "_note": "Near has two account ID formats: 64-char lowercase hex (implicit, 32-byte Ed25519) OR named accounts (regex match, low-value to classify as keys).",
+  "implicit_length_hex": 64,
+  "implicit_charset": "lowercase hex (0-9a-f) only, NO 0x prefix",
+  "named_examples": ["alice.near", "example.testnet"],
+  "named_regex": "^[a-z0-9][a-z0-9\\-]*[a-z0-9](\\.near|\\.testnet)$",
+  "invalid": ["0xabc", "not a near account"]
+}
