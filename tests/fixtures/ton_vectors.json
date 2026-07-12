@@ -1,0 +1,12 @@
+{
+  "_source": "https://docs.ton.org/foundations/addresses-formats",
+  "_note": "TON user-friendly format: tag(1: 0x11 bounceable, 0x51 non-bounceable, with 0x80 bit for testnet) + workchain(1, signed) + 32-byte hash + 2-byte CRC16-XMODEM, base64/url. Test code generates fixtures via ton_encode.",
+  "tags": {
+    "0x11": "EQ bounceable mainnet",
+    "0x51": "UQ non-bounceable mainnet",
+    "0x80_or": "testnet bit"
+  },
+  "length_chars_base64": 48,
+  "checksum": "2-byte CRC16-XMODEM",
+  "invalid": ["0xabc", "not a ton address"]
+}
