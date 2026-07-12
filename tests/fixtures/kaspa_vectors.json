@@ -1,0 +1,8 @@
+{
+  "_source": "https://github.com/kaspanet/docs and https://docs.rs/kaspa-addresses",
+  "_note": "Kaspa uses bech32 with HRP 'kaspa' (mainnet) or 'kaspatest' (testnet). Body = Schnorr pubkey (32 bytes).",
+  "hrps": ["kaspa", "kaspatest"],
+  "encoding": "bech32 (NOT bech32m)",
+  "prefix_format": "kaspa:qz... (with colon) OR kaspa... (without)",
+  "invalid": ["0xabc", "not a kaspa address"]
+}
