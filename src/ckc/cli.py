@@ -46,7 +46,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p.add_argument("--no-cross-chain", action="store_true", help="omit cross-chain alternates")
     p.add_argument("--no-wallets", action="store_true", help="omit wallet compatibility list")
     p.add_argument("--explain", action="store_true", help="include repair trace")
-    p.add_argument("--min-confidence", type=int, default=0, help="filter matches below N%")
+    p.add_argument("--min-confidence", type=int, default=0, help="filter matches below N%%")
     p.add_argument("--chains", help="comma-separated chain whitelist (e.g. btc,eth,sol)")
     return p
 
