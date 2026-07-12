@@ -1,0 +1,14 @@
+{
+  "_source": "https://docs.getmonero.org/specifications/address-standard/ and https://docs.rs/base58-monero",
+  "_note": "Monero uses BLOCK-ENCODED base58 (8-byte blocks → 11 chars), NOT whole-payload. 69 bytes = 8 full blocks + 5-byte remainder → 95 chars mainnet. Keccak-256 checksum (first 4 bytes).",
+  "network_bytes": {
+    "0x12": "mainnet",
+    "0x18": "stagenet",
+    "0x35": "testnet"
+  },
+  "address_structure": "1-byte network + 32-byte spend pubkey + 32-byte view pubkey + 4-byte Keccak checksum = 69 bytes",
+  "length_chars_mainnet": 95,
+  "subaddress_prefix": "8",
+  "integrated_prefix": "4",
+  "invalid": ["0xabc", "not a monero address"]
+}
