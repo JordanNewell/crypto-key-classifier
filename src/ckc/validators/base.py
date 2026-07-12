@@ -116,7 +116,7 @@ def _bech32_verify_checksum(hrp: str, data: list[int]) -> str | None:
 
 
 def _bech32_create_checksum(hrp: str, data: list[int], spec: str) -> list[int]:
-    const = 0 if spec == "bech32" else BECH32M_CONST
+    const = 1 if spec == "bech32" else BECH32M_CONST
     values = _bech32_hrp_expand(hrp) + data
     polymod = _bech32_polymod(values + [0, 0, 0, 0, 0, 0]) ^ const
     return [(polymod >> 5 * (5 - i)) & 31 for i in range(6)]
