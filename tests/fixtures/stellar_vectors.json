@@ -1,0 +1,13 @@
+{
+  "_source": "https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0023.md",
+  "_note": "Stellar uses base32 RFC4648 unpadded with CRC16-XMODEM checksum. Version byte identifies type: 0x30=G (account), 0x90=S (secret). Test code generates fixtures via stellar_encode.",
+  "version_bytes": {
+    "0x30": "G (account)",
+    "0x90": "S (secret key)",
+    "0x60": "M (muxed account, SEP-23)"
+  },
+  "length_chars_G_S": 56,
+  "length_chars_M": 69,
+  "checksum": "2-byte CRC16-XMODEM",
+  "invalid": ["0xabc", "not a stellar address"]
+}
