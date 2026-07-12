@@ -11,7 +11,12 @@ import re
 
 from ckc.data.wallets import wallets_for
 from ckc.models import Candidate, Match
-from ckc.validators.base import base58check_decode, base58check_encode, bech32_validate
+from ckc.validators.base import (
+    base58check_decode,
+    base58check_encode,
+    bech32_validate,
+    convertbits,
+)
 
 # Version bytes per chain (P2PKH, P2SH)
 # Source: https://en.bitcoin.it/wiki/List_of_address_prefixes
@@ -99,6 +104,17 @@ class BTCValidator:
         expected_spec = "bech32m" if witver >= 1 else "bech32"
         if variant != expected_spec:
             return None
+
+        # BIP-173 §"Decoding": witness program is data[1:] converted from 5-bit
+        # to 8-bit groups. v0 programs MUST be 20 or 32 bytes; v1+ may be 2-40.
+        program = convertbits(list(data[1:]), 5, 8, False)
+        if program is None:
+            return None
+        if witver == 0 and len(program) not in (20, 32):
+            return None
+        if witver >= 1 and not (2 <= len(program) <= 40):
+            return None
+
         fmt = "taproot-v1" if witver == 1 else f"bech32-segwit-v{witver}"
         return Match(
             chain="BTC",

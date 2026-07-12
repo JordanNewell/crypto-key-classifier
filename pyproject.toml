@@ -12,10 +12,7 @@ license = { text = "MIT" }
 authors = [{ name = "Jordan Newell" }]
 dependencies = [
     "base58>=2.1.1",
-    "bech32>=1.2.0",
     "pycryptodome>=3.20",
-    "ecdsa>=0.18",
-    "pynacl>=1.5",
 ]
 
 [project.optional-dependencies]

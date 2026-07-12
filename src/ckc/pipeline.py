@@ -83,6 +83,19 @@ def classify(raw: str, config: Config | None = None) -> list[Match]:
                 if m.checksum_status == "valid":
                     break
 
+    # Dedup on (chain, format, confidence, checksum_status). Multiple preprocessor
+    # variants (raw / lower / upper / hex-stripped) of the same input can all
+    # validate and produce identical matches — keep only one of each.
+    seen: set[tuple[str, str, int, str]] = set()
+    deduped: list[Match] = []
+    for m in matches:
+        key = (m.chain, m.format, m.confidence, m.checksum_status)
+        if key in seen:
+            continue
+        seen.add(key)
+        deduped.append(m)
+    matches = deduped
+
     matches.sort(key=lambda m: m.confidence, reverse=True)
     return matches
 

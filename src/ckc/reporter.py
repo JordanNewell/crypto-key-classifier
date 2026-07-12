@@ -53,7 +53,13 @@ def render_rich(
         if show_cross_chain and m.cross_chain_alternates:
             lines.append("    Cross-chain:  same key as →")
             for chain, addr in m.cross_chain_alternates[:10]:
-                lines.append(f"      • {chain:6}  {addr}")
+                # Defense-in-depth: mask private-key alternates even if an
+                # upstream validator accidentally emitted raw key material.
+                # When mask_private_keys=False (--no-mask), mask_key is a no-op
+                # for addresses and returns the value unchanged for PKs only if
+                # the flag is False — preserving the explicit opt-in escape hatch.
+                display = mask_key(addr, m.key_type, mask_private_keys)
+                lines.append(f"      • {chain:6}  {display}")
             if len(m.cross_chain_alternates) > 10:
                 lines.append(f"      • [+{len(m.cross_chain_alternates) - 10} more]")
         if explain and m.repairs_applied:
@@ -92,13 +98,19 @@ def render_json(
     payload = {
         "input": masked_input,
         "best_guess": matches[0].chain if matches else None,
-        "matches": [_match_to_dict(m) for m in matches],
+        "matches": [_match_to_dict(m, mask_private_keys) for m in matches],
     }
     return json.dumps(payload, indent=2)
 
 
-def _match_to_dict(m: Match) -> dict[str, object]:
-    return asdict(m)
+def _match_to_dict(m: Match, mask_private_keys: bool = True) -> dict[str, object]:
+    d = asdict(m)
+    if mask_private_keys and m.key_type == "private-key" and d.get("cross_chain_alternates"):
+        d["cross_chain_alternates"] = [
+            (chain, mask_key(addr, "private-key", True))
+            for chain, addr in d["cross_chain_alternates"]
+        ]
+    return d
 
 
 def _infer_key_type(matches: list[Match]) -> str:
