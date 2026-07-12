@@ -1,0 +1,12 @@
+{
+  "_source": "https://tezos.gitlab.io/shell.html#cryptographic-primitives and octez docs",
+  "_note": "Tezos uses standard Bitcoin base58check with specific 3-byte prefix bytes that produce recognizable 4-char string prefixes (tz1/tz2/tz3/tz4). Test code generates fixtures via base58check_encode with the right prefix bytes.",
+  "prefixes": {
+    "tz1_Ed25519": "06a19f",
+    "tz2_secp256k1": "06a1a1",
+    "tz3_P256": "06a1a4",
+    "tz4_BLS12-381": "06a1a0"
+  },
+  "length_chars": 36,
+  "invalid": ["0xabc", "not a tezos address", "tz1short"]
+}
