@@ -24,11 +24,24 @@ def _strip_all_whitespace(s: str) -> str:
     return _WS_RE.sub("", s)
 
 
+def _normalize_whitespace(s: str) -> str:
+    """Collapse runs of whitespace to single spaces, trim leading/trailing.
+
+    Preserves internal word boundaries — critical for mnemonics where spaces
+    between words are structural (the BIP-39 regex requires single-space
+    separation). Use this instead of _strip_all_whitespace when internal
+    whitespace is meaningful.
+    """
+    return _WS_RE.sub(" ", s).strip()
+
+
 def preprocess(raw: str) -> list[Candidate]:
     """Generate Stage-1 normalized candidates from raw input.
 
     Returns a deduplicated list. The first candidate is always the
-    "most normalized" form (whitespace stripped, lowercased for non-EIP-55).
+    "most normalized" form. Both a ws-normalized variant (preserves internal
+    spaces, for mnemonics) and a ws-stripped variant (no internal spaces, for
+    addresses/keys) are generated so downstream validators pick the right one.
     """
     if not raw:
         return []
@@ -49,21 +62,40 @@ def preprocess(raw: str) -> list[Candidate]:
                 )
             )
 
-    # Stage 1a: whitespace strip (most-normalized first)
+    # Stage 1a-i: whitespace normalize (collapse runs to single spaces, trim).
+    # Preserves internal word boundaries — needed for mnemonics.
+    ws_normalized = _normalize_whitespace(raw)
     ws_stripped = _strip_all_whitespace(raw)
-    add(ws_stripped, ["strip-ws"] if ws_stripped != raw else [])
 
-    # Stage 1b: prefix drop
+    # Repairs for the ws-normalized form. When ws_normalized == ws_stripped
+    # (single-word input, only leading/trailing ws), "strip-ws" is the accurate
+    # label. When they differ (multi-word input with preserved internal spaces),
+    # "ws-normalize" is the accurate label.
+    if ws_normalized == ws_stripped:
+        ws_norm_repairs = ["strip-ws"] if ws_normalized != raw else []
+    else:
+        ws_norm_repairs = ["ws-normalize"] if ws_normalized != raw else []
+    add(ws_normalized, ws_norm_repairs)
+
+    # Stage 1a-ii: full whitespace strip (no internal spaces, for addresses/keys)
+    strip_repairs = ["strip-ws"] if ws_stripped != raw else []
+    if ws_stripped != ws_normalized:
+        add(ws_stripped, strip_repairs)
+
+    # Stage 1b: prefix drop on ws-stripped form
     for prefix in PREFIXES_TO_DROP:
         if ws_stripped.startswith(prefix):
             add(ws_stripped[len(prefix):], ["strip-ws", f"drop-prefix:{prefix}"])
 
-    # Stage 1c: case variants. Only attribute "strip-ws" if whitespace was
-    # actually stripped from the raw input — otherwise a pure case change gets
-    # falsely downgraded in the pipeline's repair-confidence logic.
-    case_repairs = ["strip-ws"] if ws_stripped != raw else []
-    add(ws_stripped.lower(), [*case_repairs, "lowercase"])
-    add(ws_stripped.upper(), [*case_repairs, "uppercase"])
+    # Stage 1c: case variants — produce for BOTH ws-normalized and ws-stripped
+    # forms so both mnemonic (needs internal spaces) and address/key (no
+    # internal spaces) validators get a lowercase candidate.
+    base_strip_repairs = strip_repairs
+    base_norm_repairs = ws_norm_repairs
+    add(ws_normalized.lower(), [*base_norm_repairs, "lowercase"])
+    add(ws_stripped.lower(), [*base_strip_repairs, "lowercase"])
+    add(ws_normalized.upper(), [*base_norm_repairs, "uppercase"])
+    add(ws_stripped.upper(), [*base_strip_repairs, "uppercase"])
 
     # Identity (no repairs) — added LAST so most-normalized is first
     add(raw, [])
