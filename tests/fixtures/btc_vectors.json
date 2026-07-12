@@ -1,0 +1,31 @@
+{
+  "_source": "https://en.bitcoin.it/wiki/List_of_address_prefixes and BIP-173/BIP-350 reference test vectors",
+  "_note": "Test code generates LTC/DOGE/WIF fixtures programmatically via base58check_encode for checksum symmetry. This file holds reference addresses for documentation only.",
+  "addresses_p2pkh_btc_known": [
+    "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
+  ],
+  "addresses_bech32_segwit_v0_bip173_reference": [
+    "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
+    "BC1QW508D6QEJXTDG4Y5R3ZARVARY0C5XW7KV8F3T4"
+  ],
+  "addresses_bech32m_taproot_bip350_reference": [
+    "bc1p5cyxnuxmeuwuvkwfem96lqzszd02n6xdcjrs20cac6yqjjwudpxqkedrcr"
+  ],
+  "version_bytes": {
+    "_doc": "P2PKH/P2SH version bytes per chain — used by validator to dispatch + cross-encode",
+    "BTC_P2PKH": "0x00",
+    "BTC_P2SH": "0x05",
+    "LTC_P2PKH": "0x30",
+    "LTC_P2SH": "0x32",
+    "DOGE_P2PKH": "0x1e",
+    "DOGE_P2SH": "0x16",
+    "BTC_WIF": "0x80",
+    "LTC_WIF": "0xb0",
+    "DOGE_WIF": "0x9e"
+  },
+  "invalid_examples": [
+    "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfXX",
+    "not a key at all",
+    "0xdeadbeef"
+  ]
+}
