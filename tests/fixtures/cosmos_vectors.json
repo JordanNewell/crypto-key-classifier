@@ -1,0 +1,10 @@
+{
+  "_source": "https://docs.cosmos.network and chain-registry on GitHub",
+  "_note": "Test code uses bech32_encode to generate known-valid cosmos addresses at runtime (don't rely on hardcoded real addresses)",
+  "hrps": ["cosmos", "osmo", "juno", "akash", "inj", "evmos", "stride", "regen", "persistence"],
+  "invalid": [
+    "cosmos1invalid",
+    "0xabc",
+    "not a cosmos address"
+  ]
+}
