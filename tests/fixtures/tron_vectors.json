@@ -1,0 +1,8 @@
+{
+  "_source": "https://tronprotocol.github.io/documentation/en/introduction/address/",
+  "_note": "Test code generates valid TRX addresses programmatically via base58check_encode(b'\\x41' + hash160).",
+  "prefix_byte": "0x41",
+  "length_chars": 34,
+  "always_starts_with": "T",
+  "invalid": ["0xabc", "not a tron address", "Tinvalid"]
+}
