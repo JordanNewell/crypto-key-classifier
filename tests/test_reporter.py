@@ -46,3 +46,53 @@ def test_mask_key_for_private_key():
 def test_mask_key_off_for_address():
     addr = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"
     assert mask_key(addr, key_type="address") == addr
+
+
+def test_private_key_alternates_are_masked():
+    """Regression for Issue #1: cross-chain alternates for private keys must
+    be masked in default rich output — the raw private key string must never
+    appear verbatim."""
+    raw_pk = "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318"
+    m = Match(
+        chain="ETH",
+        format="secp256k1-private-key",
+        key_type="private-key",
+        confidence=100,
+        checksum_status="none",
+        network="mainnet",
+        cross_chain_alternates=[("Polygon", raw_pk), ("Base", raw_pk)],
+        wallet_compatibility=[],
+        repairs_applied=[],
+        notes=[],
+    )
+    out = render_rich(raw_pk, [m], mask_private_keys=True)
+    # The raw key must NOT appear anywhere in the rendered output.
+    assert raw_pk not in out
+    # Masked form (mask_key returns s[:4]...s[-4:]) should be present instead.
+    assert "0x4c...2318" in out
+
+
+def test_private_key_alternates_are_masked_json():
+    """Regression for Issue #1: JSON output must also mask private-key
+    cross-chain alternates."""
+    import json
+
+    raw_pk = "0x4c0883a69102937d6231471b5dbb6204fe5129617082792ae468d01a3f362318"
+    m = Match(
+        chain="ETH",
+        format="secp256k1-private-key",
+        key_type="private-key",
+        confidence=100,
+        checksum_status="none",
+        network="mainnet",
+        cross_chain_alternates=[("Polygon", raw_pk)],
+        wallet_compatibility=[],
+        repairs_applied=[],
+        notes=[],
+    )
+    out = render_json(raw_pk, [m], mask_private_keys=True)
+    assert raw_pk not in out
+    parsed = json.loads(out)
+    # alternates tuple round-trips as a list in JSON
+    alt_value = parsed["matches"][0]["cross_chain_alternates"][0][1]
+    assert raw_pk not in alt_value

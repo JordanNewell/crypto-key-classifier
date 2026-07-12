@@ -46,3 +46,13 @@ def test_min_confidence_filter():
     # SOL address caps at 50 — should be filtered out
     results = classify("dDCQNQXeMSaKwBPPnYiM6QXVi3PjDTW154H6pgKVmYc", config=cfg)
     assert results == []
+
+
+def test_no_duplicate_matches():
+    """Regression for Issue #2: preprocessor emits multiple candidates
+    (raw / lower / upper) that all validate against EVMValidator for an
+    EIP-55 address. The pipeline must emit exactly one ETH/address-eip55
+    match, not duplicates."""
+    results = classify("0x5aAeb6053F3E94C9b9A09f33669435E7Ef1BeAed")
+    eth_eip55 = [m for m in results if m.chain == "ETH" and m.format == "address-eip55"]
+    assert len(eth_eip55) == 1

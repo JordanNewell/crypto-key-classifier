@@ -58,9 +58,12 @@ def preprocess(raw: str) -> list[Candidate]:
         if ws_stripped.startswith(prefix):
             add(ws_stripped[len(prefix):], ["strip-ws", f"drop-prefix:{prefix}"])
 
-    # Stage 1c: case variants
-    add(ws_stripped.lower(), ["strip-ws", "lowercase"])
-    add(ws_stripped.upper(), ["strip-ws", "uppercase"])
+    # Stage 1c: case variants. Only attribute "strip-ws" if whitespace was
+    # actually stripped from the raw input — otherwise a pure case change gets
+    # falsely downgraded in the pipeline's repair-confidence logic.
+    case_repairs = ["strip-ws"] if ws_stripped != raw else []
+    add(ws_stripped.lower(), [*case_repairs, "lowercase"])
+    add(ws_stripped.upper(), [*case_repairs, "uppercase"])
 
     # Identity (no repairs) — added LAST so most-normalized is first
     add(raw, [])
