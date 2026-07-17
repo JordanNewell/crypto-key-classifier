@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crypto-key-classifier"
-version = "0.1.0"
+version = "0.4.0"
 description = "Classify any crypto-key string (BTC/ETH/SOL/Cosmos + more) with aggressive recovery from corruption"
 readme = "README.md"
 requires-python = ">=3.10"
