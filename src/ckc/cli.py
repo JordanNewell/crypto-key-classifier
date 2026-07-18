@@ -1,4 +1,4 @@
-"""CLI entry point.
+"""Parse argv / stdin / file inputs and route them through the classify pipeline.
 
 Usage:
   classify-key <INPUT>
