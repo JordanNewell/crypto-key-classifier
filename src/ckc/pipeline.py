@@ -1,4 +1,4 @@
-"""Pipeline orchestrator.
+"""Orchestrate the classify pipeline: preprocess → validate → repair → rank.
 
 For each input:
   1. Preprocess into candidate variants (Stage 1).

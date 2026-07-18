@@ -4,6 +4,16 @@ All notable changes to `crypto-key-classifier` are documented here. Tags follow 
 
 ## [Unreleased]
 
+## [v0.5.0-signature] — 2026-07-17
+
+### Added
+- `__signature__` runtime constant in `ckc.__init__` — exports the string `jn/crypto-key-classifier@0.5.0` so any consumer can verify authorship at runtime: `python -c "import ckc; print(ckc.__signature__)"`.
+- `SIGNATURE.md` at repo root documenting the three-layer code-signature pattern (style tells, `__signature__`, PGP-signed commits).
+- Headline-first imperative docstrings across `pipeline.py` and `cli.py` (Layer 1 style tell).
+
+### Changed
+- Version bump `0.4.0` → `0.5.0`. The signature work is structural, not behavior-changing.
+
 ### Fixed
 - `--help` no longer crashes on `argparse` bare-`%` interpolation (escaped as `%%` in help string). Two regression tests added to prevent recurrence. ([`b79e998`](commit/b79e998), [`f70ef12`](commit/f70ef12))
 
@@ -51,7 +61,8 @@ All notable changes to `crypto-key-classifier` are documented here. Tags follow 
 - Wallet compatibility database seeded for the four MVP families.
 - End-to-end smoke test suite.
 
-[Unreleased]: https://github.com/JordanNewell/crypto-key-classifier/compare/v0.4.0-hardened...HEAD
+[Unreleased]: https://github.com/JordanNewell/crypto-key-classifier/compare/v0.5.0-signature...HEAD
+[v0.5.0-signature]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.5.0-signature
 [v0.4.0-hardened]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.4.0-hardened
 [v0.3.0-mnemonic]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.3.0-mnemonic
 [v0.2.0-long-tail]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.2.0-long-tail
