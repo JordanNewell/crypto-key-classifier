@@ -26,13 +26,22 @@ Verified at runtime. Format: `jn/<repo-slug>@<version>`. Same format across ever
 All commits and tags signed with Jordan's signing key. Fingerprint:
 
 ```
-<KEY FINGERPRINT — populated after key generation>
+67567DC5E7C5353F85F2AF0DAC05D3F3E0EFA32A
 ```
+
+Key ID: `AC05D3F3E0EFA32A`. Type: Ed25519, expiry 2 years.
 
 Retrieve the key via Web Key Directory:
 
 ```bash
 gpg --auto-key-locate clear,dkd,nodefault --locate-key jordan@jordannewell.com
+```
+
+Or from a keyserver:
+
+```bash
+gpg --keyserver hkps://keys.openpgp.org      --recv-keys AC05D3F3E0EFA32A
+gpg --keyserver hkps://keyserver.ubuntu.com  --recv-keys AC05D3F3E0EFA32A
 ```
 
 Verify a commit:
@@ -46,8 +55,6 @@ Verify a tag:
 ```bash
 git verify-tag v0.5.0
 ```
-
-Key also published at `https://jordannewell.com/.well-known/openpgpkey/hkps/jordan.asc` and on keys.openpgp.org / keyserver.ubuntu.com.
 
 ## Verification cheat sheet
 
