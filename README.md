@@ -2,7 +2,7 @@
 
 Classify any plausible crypto-key string — BTC / ETH / SOL / Cosmos family + a dozen more chains, plus BIP-39 and Electrum mnemonics — with aggressive recovery from formatting noise, bad checksums, wrong encodings, and OCR corruption. Recommends compatible wallets and enumerates cross-chain re-encodings for shared-key families (Cosmos IBC, EVM L2s, BTC forks, Polkadot SS58).
 
-**Status:** v0.6.0-stranger-fixes, shipped. 239 tests, 17 validators covering ~50 chains, hypothesis fuzz suite.
+**Status:** v0.6.1-pypi, shipped. 239 tests, 17 validators covering ~50 chains, hypothesis fuzz suite.
 
 ## Why
 
@@ -13,12 +13,22 @@ Built for the recovery / forensics / support-ticket triage case: someone hands y
 ## Install
 
 ```bash
-pip install -e .
+pip install crypto-key-classifier
 
 classify-key --help
 ```
 
-Requires Python ≥ 3.10. Dependencies: `base58`, `pycryptodome`. Dev extras (`pytest`, `hypothesis`, `ruff`, `pyright`) via `pip install -e ".[dev]"`.
+Requires Python ≥ 3.10. Dependencies: `base58`, `pycryptodome`.
+
+### Development install
+
+For hacking on the source:
+
+```bash
+git clone https://github.com/JordanNewell/crypto-key-classifier.git
+cd crypto-key-classifier
+pip install -e ".[dev]"   # adds pytest, hypothesis, ruff, pyright
+```
 
 ## Usage
 
@@ -119,7 +129,7 @@ Validators auto-discover via `src/ckc/validators/__init__.py` — drop a new `fo
 
 ## Changelog
 
-See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.0-stranger-fixes`.
+See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.1-pypi`.
 
 ## License
 

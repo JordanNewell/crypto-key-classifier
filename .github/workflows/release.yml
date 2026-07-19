@@ -1,0 +1,67 @@
+name: Release
+
+# Triggers only on signed version tags (v*). Publishes to PyPI via OIDC
+# trusted publishing — no API tokens in repo secrets. PyPI must be
+# configured to trust this workflow path + environment (one-time setup:
+# pypi.org → Account settings → Publishing → Add publisher).
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  id-token: write  # required for OIDC trusted publishing
+
+jobs:
+  build:
+    name: Build sdist + wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so setuptools can read tags
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Install build tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: Check distribution metadata
+        run: python -m twine check dist/*
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi  # matches trusted-publisher config
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # No passwords / tokens. OIDC trusted publishing requires:
+        # pypi.org → Account Settings → Publishing → Add publisher
+        #   Publisher:   GitHub
+        #   Repository:  JordanNewell/crypto-key-classifier
+        #   Workflow:    release.yml
+        #   Environment: pypi

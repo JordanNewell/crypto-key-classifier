@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "crypto-key-classifier"
-version = "0.6.0"
+version = "0.6.1"
 description = "Classify any crypto-key string (BTC/ETH/SOL/Cosmos + more) with aggressive recovery from corruption"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,6 +14,31 @@ dependencies = [
     "base58>=2.1.1",
     "pycryptodome>=3.20",
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Homepage = "https://github.com/JordanNewell/crypto-key-classifier"
+Repository = "https://github.com/JordanNewell/crypto-key-classifier"
+Changelog = "https://github.com/JordanNewell/crypto-key-classifier/blob/main/CHANGELOG.md"
+Issues = "https://github.com/JordanNewell/crypto-key-classifier/issues"
 
 [project.optional-dependencies]
 dev = [
