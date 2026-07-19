@@ -1,5 +1,12 @@
 from ckc.models import Match
-from ckc.reporter import mask_key, render_json, render_rich, render_terse
+from ckc.reporter import (
+    mask_key,
+    render_json,
+    render_json_array,
+    render_rich,
+    render_terse,
+    truncate_for_display,
+)
 
 
 def _match(chain="BTC", confidence=100, key_type="address", checksum="valid"):
@@ -96,3 +103,52 @@ def test_private_key_alternates_are_masked_json():
     # alternates tuple round-trips as a list in JSON
     alt_value = parsed["matches"][0]["cross_chain_alternates"][0][1]
     assert raw_pk not in alt_value
+
+
+def test_render_json_array_is_single_document():
+    """Regression: batch --json must be one JSON array (not concatenated
+    objects). Stranger test caught `jq '.[]'` failing because output was
+    multiple documents."""
+    import json
+
+    m = _match()
+    out = render_json_array([("input-a", [m]), ("input-b", [m])])
+    parsed = json.loads(out)  # must not raise
+    assert isinstance(parsed, list)
+    assert len(parsed) == 2
+    assert parsed[0]["input"] == "input-a"
+    assert parsed[1]["input"] == "input-b"
+
+
+def test_render_json_array_empty():
+    import json
+
+    out = render_json_array([])
+    assert json.loads(out) == []
+
+
+def test_truncate_for_display_short_input_unchanged():
+    assert truncate_for_display("short") == "short"
+    assert truncate_for_display("x" * 80) == "x" * 80  # boundary
+
+
+def test_truncate_for_display_long_input_truncated():
+    """Regression: paste-corrupted input (valid key + thousands of trailing
+    chars) used to dump the entire blob into the INPUT: echo line. Echo must
+    cap at ~80 chars with prefix + suffix preserved."""
+    long_input = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" + "X" * 4000
+    out = truncate_for_display(long_input)
+    assert len(out) <= 80
+    assert out.startswith("1A1zP1eP5Q")
+    assert out.endswith("XXX")
+    assert "..." in out
+
+
+def test_render_rich_truncates_long_input():
+    """End-to-end: render_rich must not emit the full 4000-char input."""
+    long_input = "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa" + "X" * 4000
+    out = render_rich(long_input, [], mask_private_keys=True)
+    input_line = next(line for line in out.splitlines() if line.startswith("INPUT:"))
+    # Echo line should be ~80 chars max, not 4000+
+    assert len(input_line) < 120
+    assert "X" * 100 not in out

@@ -16,7 +16,7 @@ This repo follows the [Jordan Newell code-signature pattern](https://jordannewel
 ```python
 >>> import ckc
 >>> ckc.__signature__
-'jn/crypto-key-classifier@0.5.0'
+'jn/crypto-key-classifier@0.6.0'
 ```
 
 Verified at runtime. Format: `jn/<repo-slug>@<version>`. Same format across every Jordan Newell repo.

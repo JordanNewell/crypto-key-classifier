@@ -15,7 +15,7 @@ import argparse
 import sys
 
 from ckc.pipeline import Config, classify
-from ckc.reporter import render_json, render_rich, render_terse
+from ckc.reporter import render_json_array, render_rich, render_terse
 
 
 def _ensure_utf8_stdout() -> None:
@@ -33,7 +33,7 @@ def _build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="classify-key",
         description="Classify any crypto-key string (BTC/ETH/SOL/Cosmos + more) "
-                    "with aggressive recovering from corruption.",
+                    "with aggressive recovery from corruption.",
     )
     p.add_argument("inputs", nargs="*", help="input string(s) to classify")
     p.add_argument("--file", "-f", help="read inputs from file (one per line)")
@@ -51,29 +51,49 @@ def _build_parser() -> argparse.ArgumentParser:
     return p
 
 
-def _gather_inputs(args: argparse.Namespace) -> list[str]:
+def _gather_inputs(args: argparse.Namespace) -> tuple[list[str], str | None]:
+    """Collect inputs from positional args, --file, and stdin.
+
+    Returns (inputs, error). When error is non-None the CLI prints it to
+    stderr and exits 2 — never raises, so callers don't see raw tracebacks
+    for missing/unreadable files.
+    """
     inputs: list[str] = list(args.inputs)
     if args.file:
-        with open(args.file, encoding="utf-8") as f:
-            inputs.extend(line.strip() for line in f if line.strip() and not line.startswith("#"))
+        try:
+            f = open(args.file, encoding="utf-8")
+        except OSError as e:
+            return [], f"error: cannot open --file {args.file!r}: {e.strerror or e}"
+        with f:
+            inputs.extend(
+                line.strip() for line in f if line.strip() and not line.startswith("#")
+            )
     if not sys.stdin.isatty() and not inputs:
         for line in sys.stdin:
             stripped = line.strip()
             if stripped and not stripped.startswith("#"):
                 inputs.append(stripped)
-    return inputs
+    return inputs, None
 
 
 def main(argv: list[str] | None = None) -> int:
     _ensure_utf8_stdout()
     args = _build_parser().parse_args(argv)
-    inputs = _gather_inputs(args)
+    inputs, file_err = _gather_inputs(args)
+
+    if file_err:
+        print(file_err, file=sys.stderr)
+        return 2
 
     if not inputs:
         print("error: no input provided", file=sys.stderr)
         return 2
 
-    chains_whitelist = set(args.chains.split(",")) if args.chains else None
+    chains_whitelist = (
+        {c.strip().upper() for c in args.chains.split(",") if c.strip()}
+        if args.chains
+        else None
+    )
     config = Config(
         chains=chains_whitelist,
         min_confidence=args.min_confidence,
@@ -90,13 +110,16 @@ def main(argv: list[str] | None = None) -> int:
             file=sys.stderr,
         )
 
-    for raw in inputs:
-        matches = classify(raw, config=config)
+    results = [(raw, classify(raw, config=config)) for raw in inputs]
 
-        # Choose output mode
-        if args.as_json:
-            print(render_json(raw, matches, mask_private_keys=mask))
-        elif args.rich or not (is_batch or args.terse):
+    # JSON mode: emit a single array wrapping all results so the documented
+    # `jq '.[] | .best_guess'` pipeline works for both single and batch input.
+    if args.as_json:
+        print(render_json_array(results, mask_private_keys=mask))
+        return 0
+
+    for raw, matches in results:
+        if args.rich or not (is_batch or args.terse):
             # Single input default → rich
             print(
                 render_rich(
