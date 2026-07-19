@@ -4,6 +4,26 @@ All notable changes to `crypto-key-classifier` are documented here. Tags follow 
 
 ## [Unreleased]
 
+## [v0.6.1-pypi] — 2026-07-19
+
+### Added
+- First PyPI release. `pip install crypto-key-classifier` now works for
+  anyone, no source clone required.
+- GitHub Actions release workflow (`.github/workflows/release.yml`)
+  publishes to PyPI automatically on signed `v*` tag push. Uses OIDC
+  trusted publishing — no API tokens stored in repo secrets.
+- `classifiers` and `[project.urls]` populated in `pyproject.toml` so
+  PyPI's project page shows topics, license, Python versions, and links
+  to repo / changelog / issues.
+- CI workflow (`.github/workflows/ci.yml`) committed. Matrix across
+  Python 3.10 / 3.11 / 3.12 on every push and PR; Ruff + Pytest gating,
+  Pyright advisory.
+
+### Changed
+- README install section: PyPI is now the primary path; source clone
+  moved under "Development install".
+- Version bump `0.6.0` → `0.6.1`.
+
 ## [v0.6.0-stranger-fixes] — 2026-07-19
 
 ### Fixed
@@ -97,7 +117,8 @@ the session log; test scenarios reproduced in `tests/test_cli.py` and
 - Wallet compatibility database seeded for the four MVP families.
 - End-to-end smoke test suite.
 
-[Unreleased]: https://github.com/JordanNewell/crypto-key-classifier/compare/v0.6.0-stranger-fixes...HEAD
+[Unreleased]: https://github.com/JordanNewell/crypto-key-classifier/compare/v0.6.1-pypi...HEAD
+[v0.6.1-pypi]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.6.1-pypi
 [v0.6.0-stranger-fixes]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.6.0-stranger-fixes
 [v0.5.0-signature]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.5.0-signature
 [v0.4.0-hardened]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.4.0-hardened
