@@ -11,6 +11,10 @@ from dataclasses import asdict
 
 from ckc.models import Match
 
+# Cap for the INPUT: echo line. Paste-corrupted inputs (valid key + thousands
+# of trailing chars) otherwise dump the entire blob into the terminal.
+_ECHO_MAX = 80
+
 
 def mask_key(s: str, key_type: str, mask_private_keys: bool = True) -> str:
     """Mask private keys by default. Addresses are public — never masked."""
@@ -20,6 +24,21 @@ def mask_key(s: str, key_type: str, mask_private_keys: bool = True) -> str:
     if len(s) <= 8:
         return "***"
     return f"{s[:4]}...{s[-4:]}"
+
+
+def truncate_for_display(s: str, max_len: int = _ECHO_MAX) -> str:
+    """Truncate long inputs for the INPUT: echo line.
+
+    Keeps the prefix and suffix visible so the user can still recognize the
+    key. Applied AFTER masking, so masked private keys (already short) are
+    unaffected.
+    """
+    if len(s) <= max_len:
+        return s
+    keep = max_len - 3
+    head = keep * 2 // 3
+    tail = keep - head
+    return f"{s[:head]}...{s[-tail:]}"
 
 
 def render_rich(
@@ -33,7 +52,7 @@ def render_rich(
     """Rich multi-line output for single-input mode."""
     lines: list[str] = []
     masked_input = mask_key(input_str, _infer_key_type(matches), mask_private_keys)
-    lines.append(f"INPUT: {masked_input}")
+    lines.append(f"INPUT: {truncate_for_display(masked_input)}")
     lines.append("")
 
     if not matches:
@@ -80,11 +99,12 @@ def render_terse(
 ) -> str:
     """One-line-per-input output for batch mode."""
     masked_input = mask_key(input_str, _infer_key_type(matches), mask_private_keys)
+    echoed = truncate_for_display(masked_input)
     if not matches:
-        return f"{masked_input:30.30}  → NO MATCH"
+        return f"{echoed:30.30}  → NO MATCH"
     top = matches[0]
     return (
-        f"{masked_input:30.30}  → {top.chain}/{top.format} "
+        f"{echoed:30.30}  → {top.chain}/{top.format} "
         f"({top.confidence}%, checksum {top.checksum_status})"
     )
 
@@ -94,14 +114,38 @@ def render_json(
     matches: list[Match],
     mask_private_keys: bool = True,
 ) -> str:
-    """Structured JSON for scripting."""
+    """Single-input JSON (one object). Kept as a public helper."""
+    return json.dumps(
+        _json_payload(input_str, matches, mask_private_keys), indent=2
+    )
+
+
+def render_json_array(
+    items: list[tuple[str, list[Match]]],
+    mask_private_keys: bool = True,
+) -> str:
+    """Batch JSON: a single array wrapping one payload per input.
+
+    Output is a JSON array so `jq '.[] | .best_guess'` works as documented,
+    for both single-input and batch invocations.
+    """
+    return json.dumps(
+        [_json_payload(raw, matches, mask_private_keys) for raw, matches in items],
+        indent=2,
+    )
+
+
+def _json_payload(
+    input_str: str,
+    matches: list[Match],
+    mask_private_keys: bool = True,
+) -> dict[str, object]:
     masked_input = mask_key(input_str, _infer_key_type(matches), mask_private_keys)
-    payload = {
+    return {
         "input": masked_input,
         "best_guess": matches[0].chain if matches else None,
         "matches": [_match_to_dict(m, mask_private_keys) for m in matches],
     }
-    return json.dumps(payload, indent=2)
 
 
 def _match_to_dict(m: Match, mask_private_keys: bool = True) -> dict[str, object]:

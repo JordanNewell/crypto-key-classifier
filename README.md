@@ -2,7 +2,7 @@
 
 Classify any plausible crypto-key string — BTC / ETH / SOL / Cosmos family + a dozen more chains, plus BIP-39 and Electrum mnemonics — with aggressive recovery from formatting noise, bad checksums, wrong encodings, and OCR corruption. Recommends compatible wallets and enumerates cross-chain re-encodings for shared-key families (Cosmos IBC, EVM L2s, BTC forks, Polkadot SS58).
 
-**Status:** v0.4.0-hardened, shipped. 229 tests, 17 validators covering ~50 chains, hypothesis fuzz suite.
+**Status:** v0.6.0-stranger-fixes, shipped. 239 tests, 17 validators covering ~50 chains, hypothesis fuzz suite.
 
 ## Why
 
@@ -104,7 +104,7 @@ Each input runs through three stages:
 ```bash
 pip install -e ".[dev]"
 
-# Run the full suite (229 tests)
+# Run the full suite (239 tests)
 pytest
 
 # Property tests via hypothesis
@@ -119,7 +119,7 @@ Validators auto-discover via `src/ckc/validators/__init__.py` — drop a new `fo
 
 ## Changelog
 
-See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.4.0-hardened`.
+See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.0-stranger-fixes`.
 
 ## License
 

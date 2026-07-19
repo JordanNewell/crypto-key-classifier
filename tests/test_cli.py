@@ -26,10 +26,63 @@ def test_cli_terse_mode():
 
 
 def test_cli_json_mode():
+    """--json always emits a JSON array (single object would break the
+    documented `jq '.[] | .best_guess'` pipeline)."""
     result = _run(["--json", "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"])
     import json
     parsed = json.loads(result.stdout)
-    assert parsed["matches"][0]["chain"] == "BTC"
+    assert isinstance(parsed, list)
+    assert parsed[0]["matches"][0]["chain"] == "BTC"
+
+
+def test_cli_json_batch_emits_single_array():
+    """Regression: batch --json must be ONE valid JSON document (an array),
+    not concatenated per-input objects. Stranger test caught this — the
+    README's `jq '.[] | .best_guess'` pipe was failing with exit 5."""
+    stdin = (
+        "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa\n"
+        "0xd8da6bf26964af9d7eed9e03e53415d37aa96045\n"
+    )
+    result = _run(["--json"], stdin=stdin)
+    import json
+    parsed = json.loads(result.stdout)  # must NOT raise JSONDecodeError
+    assert isinstance(parsed, list)
+    assert len(parsed) == 2
+    # The documented jq filter works on the parsed array
+    best_guesses = [r["best_guess"] for r in parsed]
+    assert "BTC" in best_guesses
+    assert "ETH" in best_guesses
+
+
+def test_cli_chains_lowercase_accepted():
+    """Regression: README says `--chains btc,eth,sol` (lowercase) but the
+    pipeline filter required uppercase chain codes. Stranger test caught
+    a lowercase whitelist producing 'No matches' on valid keys."""
+    result = _run(["--chains", "btc", "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"])
+    assert result.returncode == 0
+    assert "BTC" in result.stdout
+    assert "100%" in result.stdout
+
+
+def test_cli_chains_mixed_case_accepted():
+    result = _run(["--chains", "BtC,eth", "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa"])
+    assert "BTC" in result.stdout
+
+
+def test_cli_chains_filters_correctly():
+    """--chains btc must NOT match an EVM-only input (whitelist still works)."""
+    result = _run(["--chains", "btc", "0xd8da6bf26964af9d7eed9e03e53415d37aa96045"])
+    assert "BTC" not in result.stdout
+
+
+def test_cli_missing_file_friendly_error():
+    """Regression: --file with missing path used to throw a raw FileNotFoundError
+    traceback. Must emit a one-line error to stderr and exit 2."""
+    result = _run(["--file", "/nonexistent/path/that/does/not/exist.txt"])
+    assert result.returncode == 2
+    assert "Traceback" not in result.stderr
+    assert "error:" in result.stderr
+    assert "--file" in result.stderr or "file" in result.stderr.lower()
 
 
 def test_cli_stdin_batch_uses_terse():

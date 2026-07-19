@@ -4,6 +4,42 @@ All notable changes to `crypto-key-classifier` are documented here. Tags follow 
 
 ## [Unreleased]
 
+## [v0.6.0-stranger-fixes] — 2026-07-19
+
+### Fixed
+- `--chains` now accepts case-insensitive chain codes. README documented
+  `--chains btc,eth,sol` (lowercase), but the pipeline filter required
+  uppercase (`BTC,ETH,SOL`), so copy-pasting from the README produced
+  "No matches found" on valid keys. Codes are now upper-cased before the
+  whitelist is built.
+- `--json` now emits a single JSON array wrapping all results. Previously
+  each input produced a separate JSON object (concatenated), so the
+  documented `classify-key --json addr.txt | jq '.[] | .best_guess'`
+  pipeline failed with `jq` exit 5 ("Cannot index string with string").
+  Single-input output is now a one-element array for consistency.
+- `--file` with a missing or unreadable path now prints a one-line error
+  to stderr and exits 2. Previously raised an uncaught `FileNotFoundError`
+  traceback.
+- Long inputs (e.g. paste-corrupted keys with thousands of trailing
+  characters) no longer dump the entire blob into the `INPUT:` echo line.
+  Inputs longer than 80 chars are truncated to `prefix…suffix` after
+  masking, so the recognizable head and tail stay visible.
+- `--help` description: "aggressive recovering" → "aggressive recovery".
+
+### Added
+- `render_json_array(items, mask_private_keys=...)` in `ckc.reporter` for
+  batch JSON emission.
+- `truncate_for_display(s, max_len=80)` helper, used by rich and terse
+  renderers.
+- 10 regression tests covering the five stranger-test bugs.
+
+### Stranger test context
+Discovered via a fresh-clone stranger install + adversarial CLI exercise
+on 2026-07-19. Two of the five bugs (`--chains` case sensitivity, `--json`
+array shape) broke the README's own examples on first use. Full report in
+the session log; test scenarios reproduced in `tests/test_cli.py` and
+`tests/test_reporter.py`.
+
 ## [v0.5.0-signature] — 2026-07-17
 
 ### Added
@@ -61,7 +97,8 @@ All notable changes to `crypto-key-classifier` are documented here. Tags follow 
 - Wallet compatibility database seeded for the four MVP families.
 - End-to-end smoke test suite.
 
-[Unreleased]: https://github.com/JordanNewell/crypto-key-classifier/compare/v0.5.0-signature...HEAD
+[Unreleased]: https://github.com/JordanNewell/crypto-key-classifier/compare/v0.6.0-stranger-fixes...HEAD
+[v0.6.0-stranger-fixes]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.6.0-stranger-fixes
 [v0.5.0-signature]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.5.0-signature
 [v0.4.0-hardened]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.4.0-hardened
 [v0.3.0-mnemonic]: https://github.com/JordanNewell/crypto-key-classifier/releases/tag/v0.3.0-mnemonic
