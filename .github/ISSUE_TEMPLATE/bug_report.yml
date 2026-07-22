@@ -1,0 +1,94 @@
+name: Bug report
+description: Report incorrect behavior in classify-key. For security issues, see SECURITY.md instead.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a bug.
+
+        **Security-sensitive issues** (masking bypasses, key leakage, output
+        formatting that could expose key material): do **not** use this form.
+        See [SECURITY.md](../blob/main/SECURITY.md) for the private reporting path.
+
+  - type: input
+    id: version
+    attributes:
+      label: classify-key version
+      description: Output of `classify-key --version`
+      placeholder: "0.6.1"
+    validations:
+      required: true
+
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.12.4"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "Ubuntu 24.04 / macOS 14 / Windows 11"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: chain
+    attributes:
+      label: Chain / key type
+      options:
+        - BTC (address / WIF)
+        - ETH / EVM (address / private key)
+        - SOL
+        - Cosmos family (ATOM / OSMO / JUNO / etc.)
+        - Tron / TRX
+        - XRP / XLM / DOT / XMR
+        - Sui / Aptos
+        - NEAR
+        - KAS
+        - Mnemonic (BIP-39 / Electrum)
+        - Other / multiple
+        - N/A (not chain-specific)
+    validations:
+      required: true
+
+  - type: textarea
+    id: command
+    attributes:
+      label: Command
+      description: The exact `classify-key` invocation.
+      render: shell
+      placeholder: "classify-key --explain bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+      description: What you thought would happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: |
+        Paste the actual output. Use `--explain` for the full repair trace.
+
+        **Never paste a real mainnet private key or seed phrase.** Use a
+        throwaway key or one of the public test vectors in `tests/fixtures/`.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional context
+      description: Anything else relevant. Workarounds you tried, related issues, etc.
