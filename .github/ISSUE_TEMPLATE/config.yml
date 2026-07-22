@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security report
+    url: https://github.com/JordanNewell/crypto-key-classifier/blob/main/SECURITY.md
+    about: |
+      Security-sensitive bugs (masking bypass, key leakage, output format
+      issues that could expose key material). Do NOT use public issues —
+      see SECURITY.md for the private reporting path.
+  - name: Question / discussion
+    url: https://jordannewell.com/projects/crypto-key-classifier/
+    about: Question about usage or cross-chain recovery? Check the project page first.
