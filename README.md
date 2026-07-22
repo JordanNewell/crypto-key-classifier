@@ -1,3 +1,13 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JordanNewell/crypto-key-classifier/main/assets/hero.png" alt="crypto-key-classifier — Classify any crypto-key string (BTC/ETH/SOL/Cosmos + ~50 chains). Aggressive recovery from corruption, bad checksums, OCR noise." width="100%">
+  <br>
+  <a href="https://pypi.org/project/crypto-key-classifier/"><img src="https://img.shields.io/pypi/v/crypto-key-classifier?logo=pypi&logoColor=white" alt="PyPI version"></a>
+  <a href="https://pypi.org/project/crypto-key-classifier/"><img src="https://img.shields.io/pypi/pyversions/crypto-key-classifier?logo=python&logoColor=white" alt="Python versions"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/pypi/l/crypto-key-classifier?color=blue" alt="License: MIT"></a>
+  <a href="https://github.com/JordanNewell/crypto-key-classifier/actions/workflows/ci.yml"><img src="https://github.com/JordanNewell/crypto-key-classifier/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/JordanNewell/crypto-key-classifier/releases"><img src="https://img.shields.io/github/v/release/JordanNewell/crypto-key-classifier?display_name=tag&include_prereleases" alt="latest release"></a>
+</p>
+
 # crypto-key-classifier (`classify-key` / `ckc`)
 
 Classify any plausible crypto-key string — BTC / ETH / SOL / Cosmos family + a dozen more chains, plus BIP-39 and Electrum mnemonics — with aggressive recovery from formatting noise, bad checksums, wrong encodings, and OCR corruption. Recommends compatible wallets and enumerates cross-chain re-encodings for shared-key families (Cosmos IBC, EVM L2s, BTC forks, Polkadot SS58).
@@ -29,6 +39,12 @@ git clone https://github.com/JordanNewell/crypto-key-classifier.git
 cd crypto-key-classifier
 pip install -e ".[dev]"   # adds pytest, hypothesis, ruff, pyright
 ```
+
+## In action
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/JordanNewell/crypto-key-classifier/main/assets/terminal.png" alt="crypto-key-classifier in action — ETH address classified + cross-chain re-encodings, then corrupted BTC address with OCR whitespace stripped via --explain repair trace" width="100%">
+</p>
 
 ## Usage
 
