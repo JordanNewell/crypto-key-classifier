@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #010409; }
+  html, body { width: 900px; height: 540px; overflow: hidden; }
+  body {
+    background: #010409;
+    font-family: Consolas, 'Cascadia Code', 'JetBrains Mono', monospace;
+    padding: 24px;
+  }
+  .terminal {
+    width: 852px;
+    height: 492px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+      0 30px 60px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(255, 255, 255, 0.02);
+  }
+  .titlebar {
+    background: linear-gradient(180deg, #161b22 0%, #0d1117 100%);
+    border-bottom: 1px solid #30363d;
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red { background: #ff5f56; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #27c93f; }
+  .title {
+    color: #7d8590;
+    font-size: 12.5px;
+    margin-left: 14px;
+    font-family: -apple-system, system-ui, sans-serif;
+  }
+  .body {
+    padding: 22px 26px 24px;
+    flex: 1;
+    overflow: hidden;
+    font-size: 12.5px;
+    line-height: 1.65;
+  }
+  .prompt { color: #39d353; }
+  .path { color: #7d8590; }
+  .cmd { color: #79c0ff; }
+  .arg { color: #ffa657; }
+  .muted { color: #7d8590; }
+  .ok { color: #39d353; font-weight: bold; }
+  .warn { color: #d29922; font-weight: bold; }
+  .bad { color: #f85149; font-weight: bold; }
+  .header { color: #a371f7; font-weight: bold; }
+  .label { color: #7d8590; }
+  .value { color: #e6edf3; }
+  .key { color: #d2a8ff; }
+  .chain { color: #79c0ff; }
+  .divider { color: #21262d; }
+  .gap { height: 6px; }
+  .gap-sm { height: 3px; }
+</style>
+</head>
+<body>
+<div class="terminal">
+  <div class="titlebar">
+    <div class="dot red"></div>
+    <div class="dot yellow"></div>
+    <div class="dot green"></div>
+    <div class="title">crypto-key-classifier — recovery session</div>
+  </div>
+  <div class="body">
+    <div><span class="prompt">~/recovery</span> <span class="cmd">classify-key</span> <span class="arg">0x7c13fff2d7e8b1f7b8e1d8a1f3c5b8a1f3c5b8a1</span></div>
+    <div class="gap"></div>
+    <div><span class="header">input</span>  <span class="key">0x7c13fff2...b8a1</span>  <span class="muted">(masked)</span></div>
+    <div class="gap-sm"></div>
+    <div><span class="header">best guess</span>  <span class="value">ethereum address</span></div>
+    <div>  <span class="label">chain</span>      <span class="chain">mainnet</span></div>
+    <div>  <span class="label">checksum</span>   <span class="ok">valid ✓</span></div>
+    <div>  <span class="label">format</span>     <span class="value">EIP-55 mixed-case</span></div>
+    <div>  <span class="label">confidence</span> <span class="ok">99%</span></div>
+    <div class="gap-sm"></div>
+    <div><span class="header">compatible wallets</span></div>
+    <div>  <span class="value">MetaMask · Ledger · Trezor · Rabby · Frame</span></div>
+    <div class="gap-sm"></div>
+    <div><span class="header">cross-chain re-encodings</span></div>
+    <div>  <span class="chain">Polygon</span>     <span class="key">0x7c13...b8a1</span>  <span class="muted">(same address, chain id 137)</span></div>
+    <div>  <span class="chain">Arbitrum</span>    <span class="key">0x7c13...b8a1</span>  <span class="muted">(same address, chain id 42161)</span></div>
+    <div>  <span class="chain">Optimism</span>    <span class="key">0x7c13...b8a1</span>  <span class="muted">(same address, chain id 10)</span></div>
+    <div>  <span class="chain">Base</span>        <span class="key">0x7c13...b8a1</span>  <span class="muted">(same address, chain id 8453)</span></div>
+    <div class="gap"></div>
+    <div class="divider">────────────────────────────────────────────────────────────</div>
+    <div class="gap-sm"></div>
+    <div><span class="prompt">~/recovery</span> <span class="cmd">classify-key --explain</span> <span class="arg">"bc1q xy2k gdyg ... 0wlh"</span>  <span class="muted">(spaces from OCR)</span></div>
+    <div class="gap-sm"></div>
+    <div><span class="header">repair trace</span></div>
+    <div>  <span class="ok">✓</span> <span class="value">strip whitespace</span>           <span class="muted">→</span> <span class="key">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span></div>
+    <div>  <span class="ok">✓</span> <span class="value">bech32 decode</span>              <span class="muted">→</span> <span class="value">witness v0, 20 bytes</span></div>
+    <div>  <span class="ok">✓</span> <span class="value">checksum verify</span>            <span class="muted">→</span> <span class="ok">valid ✓</span></div>
+    <div>  <span class="ok">✓</span> <span class="value">classify</span>                   <span class="muted">→</span> <span class="value">bitcoin p2wpkh (mainnet)</span>  <span class="ok">confidence 100%</span></div>
+  </div>
+</div>
+</body>
+</html>
