@@ -149,4 +149,4 @@ See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.1-pypi`.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+[MIT](LICENSE) © Jordan Newell
