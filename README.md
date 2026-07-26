@@ -5,7 +5,7 @@
   <a href="https://pypi.org/project/crypto-key-classifier/"><img src="https://img.shields.io/pypi/pyversions/crypto-key-classifier?logo=python&logoColor=white" alt="Python versions"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/pypi/l/crypto-key-classifier?color=blue" alt="License: MIT"></a>
   <a href="https://github.com/JordanNewell/crypto-key-classifier/actions/workflows/ci.yml"><img src="https://github.com/JordanNewell/crypto-key-classifier/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
-  <a href="https://github.com/JordanNewell/crypto-key-classifier/releases"><img src="https://img.shields.io/github/v/release/JordanNewell/crypto-key-classifier?display_name=tag&include_prereleases" alt="latest release"></a>
+  <a href="https://github.com/JordanNewell/crypto-key-classifier/releases"><img src="https://img.shields.io/badge/release-0.6.1-blue
 </p>
 
 # crypto-key-classifier (`classify-key` / `ckc`)
