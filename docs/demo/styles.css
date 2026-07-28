@@ -1,0 +1,190 @@
+:root {
+  --bg: #000;
+  --fg: #fff;
+  --accent: #00ff00;
+  --muted: #888;
+  --danger: #ff3b3b;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", "Consolas", monospace;
+  font-size: 15px;
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ===== Loader ===== */
+.loader {
+  position: fixed; inset: 0;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  z-index: 100;
+  transition: opacity 200ms ease;
+}
+.loader--hidden { opacity: 0; pointer-events: none; }
+.loader__spinner {
+  width: 24px; height: 24px;
+  border: 2px solid var(--accent);
+  border-top-color: transparent;
+  animation: spin 800ms linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader__text   { font-size: 16px; color: var(--accent); }
+.loader__hint   { font-size: 12px; color: var(--muted); }
+
+/* ===== Masthead ===== */
+.masthead {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--accent);
+}
+.masthead__wordmark { color: var(--accent); letter-spacing: 2px; }
+.masthead__nav a { margin-left: 16px; }
+
+/* ===== Page ===== */
+.page { max-width: 880px; margin: 0 auto; padding: 32px 24px 80px; }
+
+/* ===== Hero ===== */
+.hero { margin-bottom: 24px; }
+.hero__title {
+  font-size: 32px; letter-spacing: -1px; margin: 0 0 8px;
+  color: var(--accent);
+}
+.hero__lede { color: var(--fg); margin: 0; }
+.hero__lede strong { color: var(--accent); }
+
+/* ===== Safety banner ===== */
+.safety {
+  border: 1px solid var(--accent);
+  padding: 12px 16px;
+  margin-bottom: 32px;
+  font-size: 13px;
+  display: flex; gap: 12px; align-items: flex-start;
+}
+.safety__icon { color: var(--accent); font-weight: bold; }
+
+/* ===== Input panel ===== */
+.input-panel { margin-bottom: 32px; }
+.input-panel__label {
+  display: block; font-size: 12px; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;
+}
+.input-panel__textarea {
+  width: 100%; resize: vertical;
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--accent);
+  padding: 12px;
+  font: inherit;
+  word-break: break-all;
+}
+.input-panel__textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+.input-panel__row {
+  display: flex; flex-wrap: wrap; gap: 16px; align-items: center;
+  margin-top: 16px;
+}
+.input-panel__toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.input-panel__example { display: flex; align-items: center; gap: 8px; }
+.input-panel__example select {
+  background: var(--bg); color: var(--fg);
+  border: 1px solid var(--accent);
+  padding: 4px 8px; font: inherit;
+}
+.input-panel__note {
+  margin-top: 12px; font-size: 12px; color: var(--muted);
+  font-style: italic;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  font: inherit; padding: 6px 16px;
+  border: 1px solid var(--accent);
+  background: transparent; color: var(--accent);
+  cursor: pointer;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.btn--primary { background: var(--accent); color: var(--bg); font-weight: bold; }
+.btn--ghost   { color: var(--muted); border-color: var(--muted); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* ===== Results ===== */
+.results:empty::before {
+  content: "Results will appear here.";
+  display: block; padding: 24px; text-align: center;
+  color: var(--muted); font-style: italic;
+  border: 1px dashed var(--muted);
+}
+.results__empty, .results__error {
+  padding: 16px; border: 1px solid var(--muted);
+  color: var(--muted); margin: 0;
+}
+.results__error { border-color: var(--danger); color: var(--danger); }
+
+.match-card {
+  border: 1px solid var(--accent);
+  padding: 16px; margin-bottom: 16px;
+}
+.match-card__head {
+  display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.match-card__chain {
+  font-weight: bold; color: var(--bg);
+  background: var(--accent);
+  padding: 2px 8px;
+}
+.match-card__type  { color: var(--accent); }
+.match-card__conf  { margin-left: auto; font-size: 12px; color: var(--muted); }
+.match-card__bar {
+  height: 4px; background: var(--muted); margin-top: 4px;
+}
+.match-card__bar > span {
+  display: block; height: 100%; background: var(--accent);
+}
+.match-card__row {
+  display: grid; grid-template-columns: 120px 1fr;
+  gap: 8px; margin-top: 8px; font-size: 13px;
+}
+.match-card__row > dt { color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-size: 11px; }
+.match-card__row > dd { margin: 0; word-break: break-all; }
+.match-card__key { font-family: inherit; }
+.match-card__unmask {
+  background: transparent; border: 1px solid var(--accent);
+  color: var(--accent); font: inherit; font-size: 11px;
+  padding: 1px 6px; margin-left: 8px; cursor: pointer;
+}
+.match-card__section {
+  margin-top: 12px; border-top: 1px dashed var(--muted); padding-top: 8px;
+}
+.match-card__section-title {
+  font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+  cursor: pointer; margin: 0 0 8px;
+}
+.match-card__section-title::before { content: "[+] "; color: var(--accent); }
+.match-card__section--open .match-card__section-title::before { content: "[-] "; }
+.match-card__section-body { font-size: 13px; }
+.match-card__section:not(.match-card__section--open) .match-card__section-body { display: none; }
+.match-card__alt {
+  display: grid; grid-template-columns: 80px 1fr; gap: 8px;
+  padding: 2px 0;
+}
+.match-card__alt > code {
+  color: var(--accent); font-family: inherit;
+}
+.match-card__trace { font-size: 12px; color: var(--muted); margin: 0; white-space: pre-wrap; }
+
+/* ===== Footer ===== */
+.footer {
+  border-top: 1px solid var(--accent);
+  padding: 24px; text-align: center; font-size: 12px; color: var(--muted);
+}
+.footer a { color: var(--accent); }
