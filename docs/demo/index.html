@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>crypto-key-classifier — try it in your browser</title>
+  <meta name="description" content="Classify any crypto-key string client-side. BTC / ETH / SOL / Cosmos + ~50 chains. No server, no network calls.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="loader" class="loader">
+    <div class="loader__spinner"></div>
+    <div class="loader__text">Booting Python…</div>
+    <div class="loader__hint">First load pulls ~10MB of Pyodide + deps.</div>
+  </div>
+
+  <header class="masthead">
+    <div class="masthead__wordmark">— JN</div>
+    <nav class="masthead__nav">
+      <a href="https://github.com/JordanNewell/crypto-key-classifier">src</a>
+      <a href="https://pypi.org/project/crypto-key-classifier/">pypi</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <h1 class="hero__title">crypto-key-classifier</h1>
+      <p class="hero__lede">
+        Paste a key. Get the chain, type, checksum, and cross-chain alternates —
+        all in your browser. <strong>No server. No telemetry. The key never leaves this page.</strong>
+      </p>
+    </section>
+
+    <section class="safety" aria-label="Safety notice">
+      <span class="safety__icon">[LOCK]</span>
+      <span class="safety__text">
+        Your input never leaves your browser. Pyodide runs entirely client-side.
+        No telemetry, no server, no key material transmitted.
+      </span>
+    </section>
+
+    <section class="input-panel">
+      <label for="key-input" class="input-panel__label">Key string</label>
+      <textarea id="key-input" class="input-panel__textarea"
+        rows="6" placeholder="bc1q… / 0x… / cosmos1… / 12-word mnemonic / corrupted paste"
+        autocomplete="off" autocorrect="off" autocapitalize="off"
+        spellcheck="false"></textarea>
+
+      <div class="input-panel__row">
+        <label class="input-panel__toggle">
+          <input type="checkbox" id="explain-toggle">
+          <span>Show repair trace</span>
+        </label>
+
+        <label class="input-panel__example">
+          Load example:
+          <select id="example-select">
+            <option value="">— pick one —</option>
+          </select>
+        </label>
+
+        <button id="classify-btn" class="btn btn--primary" disabled>Classify</button>
+        <button id="clear-btn"  class="btn btn--ghost">Clear</button>
+      </div>
+
+      <p id="example-note" class="input-panel__note" hidden></p>
+    </section>
+
+    <section id="results" class="results" aria-live="polite"></section>
+  </main>
+
+  <footer class="footer">
+    <p>
+      Powered by <a href="https://pyodide.org">Pyodide</a> +
+      <a href="https://github.com/JordanNewell/crypto-key-classifier">crypto-key-classifier</a> v0.6.1.
+      MIT licensed.
+    </p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
