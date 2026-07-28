@@ -1,0 +1,32 @@
+[
+  {
+    "label": "BTC address (bech32)",
+    "value": "bc1qar0srrr7xfkvy5l643lydnw9re59gtzzwf5mdq",
+    "note": "Well-known P2WPKH example from BIP-173 / Bitcoin Wiki."
+  },
+  {
+    "label": "ETH address (EIP-55 checksum)",
+    "value": "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045",
+    "note": "vitalik.eth public donation address."
+  },
+  {
+    "label": "Solana pubkey (base58 ed25519)",
+    "value": "7xLk17EQQ5KLDLDe44wCmupJKJjTGd8hs3eSVVhCx932",
+    "note": "Solana docs example pubkey."
+  },
+  {
+    "label": "Cosmos ATOM address (20-chain HRP swap)",
+    "value": "cosmos1tj20rwhd7n4yq6u27mkm9aeyaqmuv8ynvnp7g4",
+    "note": "Cosmos Hub docs example. Watch the 20 cross-chain alternates."
+  },
+  {
+    "label": "Corrupted BTC address (whitespace repair)",
+    "value": "  1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa  ",
+    "note": "Bitcoin Genesis Block address with leading/trailing whitespace. Enable 'Show repair trace' to see strip-ws fire."
+  },
+  {
+    "label": "BIP-39 mnemonic (12 words, test vector 1)",
+    "value": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
+    "note": "Standard BIP-39 spec test vector. Masked by default — unmasking requires confirmation."
+  }
+]
