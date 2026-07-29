@@ -122,9 +122,11 @@ init();
 // ===== Classify + render =====
 
 function classifyAndRender() {
-  const input = els.input.value.trim();
+  // Don't trim — classify()'s preprocessor handles whitespace, confusables, etc.
+  // Trimming here would mask the very repair features the demo exists to show off.
+  const input = els.input.value;
   els.results.innerHTML = "";
-  if (!input) return;
+  if (!input || !input.trim()) return;
 
   let matches;
   try {

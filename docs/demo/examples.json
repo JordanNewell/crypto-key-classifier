@@ -16,8 +16,8 @@
   },
   {
     "label": "Cosmos ATOM address (20-chain HRP swap)",
-    "value": "cosmos1tj20rwhd7n4yq6u27mkm9aeyaqmuv8ynvnp7g4",
-    "note": "Cosmos Hub docs example. Watch the 20 cross-chain alternates."
+    "value": "cosmos1qqqsyqcyq5rqwzqfpg9scrgwpugpzysnrk363e",
+    "note": "Deterministic test address (hash160 = bytes 0..19) used by the ckc test suite. Watch the 19 cross-chain alternates — same key, every chain in the family."
   },
   {
     "label": "Corrupted BTC address (whitespace repair)",
