@@ -154,3 +154,10 @@ See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.1-pypi`.
 ## License
 
 [MIT](LICENSE) © Jordan Newell
+
+
+<p align="right">
+  <a href="https://jordannewell.com" title="Built by Jordan Newell">
+    <img src="assets/newell-badge.png" alt="Built by Jordan Newell" width="48" height="48">
+  </a>
+</p>
