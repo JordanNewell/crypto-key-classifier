@@ -59,6 +59,37 @@ async function bootPyodide() {
   classifyFn = pipeline.classify;
 }
 
+function slugify(label) {
+  return String(label)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function findOptionBySlug(slug) {
+  if (!slug) return null;
+  for (const opt of els.exampleSelect.options) {
+    if (opt.dataset.slug === slug) return opt;
+  }
+  return null;
+}
+
+function applyHashExample() {
+  const hash = window.location.hash || "";
+  const match = hash.match(/^#example=(.+)$/);
+  if (!match) return;
+  const slug = decodeURIComponent(match[1]);
+  const opt = findOptionBySlug(slug);
+  if (!opt) return;
+  els.exampleSelect.value = opt.value;
+  els.input.value = opt.value;
+  const ex = (examplesCache || []).find((x) => x.value === opt.value);
+  if (ex && ex.note) {
+    els.exampleNote.textContent = ex.note;
+    els.exampleNote.hidden = false;
+  }
+}
+
 async function loadExamples() {
   const res = await fetch("examples.json");
   if (!res.ok) {
@@ -70,8 +101,10 @@ async function loadExamples() {
     const opt = document.createElement("option");
     opt.value = ex.value;
     opt.textContent = ex.label;
+    opt.dataset.slug = slugify(ex.label);
     els.exampleSelect.appendChild(opt);
   }
+  applyHashExample();
   return examplesCache;
 }
 
@@ -82,15 +115,25 @@ function init() {
     els.results.innerHTML = "";
     els.exampleSelect.value = "";
     els.exampleNote.hidden = true;
+    if (window.location.hash) {
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+    }
     els.input.focus();
   });
   els.exampleSelect.addEventListener("change", (e) => {
     const value = e.target.value;
+    const selected = e.target.options[e.target.selectedIndex];
+    const slug = selected && selected.dataset.slug;
     if (!value) {
       els.exampleNote.hidden = true;
+      if (window.location.hash) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
       return;
     }
     els.input.value = value;
+    // Sync URL hash so the URL is shareable for this example.
+    history.replaceState(null, "", "#example=" + encodeURIComponent(slug));
     const match = (examplesCache || []).find((x) => x.value === value);
     if (match) {
       els.exampleNote.textContent = match.note;
@@ -213,21 +256,31 @@ function renderMatch(m) {
   // Cross-chain alternates (collapsible)
   const alternates = listToJs(m.cross_chain_alternates);
   if (alternates && alternates.length) {
+    const altPairs = alternates.map((pair) => {
+      let chainCode, altKey;
+      if (Array.isArray(pair)) {
+        [chainCode, altKey] = pair;
+      } else if (pair && typeof pair.get === "function") {
+        chainCode = pair.get(0); altKey = pair.get(1);
+      } else if (pair && typeof pair === "object") {
+        chainCode = pair[0]; altKey = pair[1];
+      } else {
+        chainCode = "?"; altKey = String(pair);
+      }
+      return [chainCode, altKey];
+    });
+
+    const copyAllBtn = makeCopyButton(() =>
+      altPairs.map(([chainCode, altKey]) => chainCode + ": " + altKey).join("\n")
+    );
+    copyAllBtn.textContent = "Copy all";
+    copyAllBtn.classList.add("match-card__copy-all");
+
     card.appendChild(renderCollapsible(
       "Cross-chain alternates (" + alternates.length + ")",
       () => {
         const body = document.createElement("div");
-        for (const pair of alternates) {
-          let chainCode, altKey;
-          if (Array.isArray(pair)) {
-            [chainCode, altKey] = pair;
-          } else if (pair && typeof pair.get === "function") {
-            chainCode = pair.get(0); altKey = pair.get(1);
-          } else if (pair && typeof pair === "object") {
-            chainCode = pair[0]; altKey = pair[1];
-          } else {
-            chainCode = "?"; altKey = String(pair);
-          }
+        for (const [chainCode, altKey] of altPairs) {
           const row = document.createElement("div");
           row.className = "match-card__alt";
           const code = document.createElement("code");
@@ -235,11 +288,15 @@ function renderMatch(m) {
           const val = document.createElement("span");
           val.style.wordBreak = "break-all";
           val.textContent = altKey;
-          row.appendChild(code); row.appendChild(val);
+          const cpy = makeCopyButton(() => altKey);
+          row.appendChild(code);
+          row.appendChild(val);
+          row.appendChild(cpy);
           body.appendChild(row);
         }
         return body;
-      }
+      },
+      copyAllBtn
     ));
   }
 
@@ -320,18 +377,62 @@ function maskValue(raw) {
   return raw.slice(0, 4) + "…" + raw.slice(-4) + " (" + (raw.length - 8) + " chars masked)";
 }
 
-function renderCollapsible(title, bodyFactory) {
+function makeCopyButton(valueFn) {
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "match-card__copy";
+  btn.textContent = "copy";
+  btn.setAttribute("aria-label", "Copy to clipboard");
+  btn.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const value = valueFn();
+    try {
+      await navigator.clipboard.writeText(value);
+    } catch {
+      // Legacy / non-secure-context fallback.
+      const ta = document.createElement("textarea");
+      ta.value = value;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch {}
+      document.body.removeChild(ta);
+    }
+    const prev = btn.textContent;
+    btn.textContent = "✓";
+    btn.classList.add("match-card__copy--done");
+    setTimeout(() => {
+      btn.textContent = prev;
+      btn.classList.remove("match-card__copy--done");
+    }, 800);
+  });
+  return btn;
+}
+
+function renderCollapsible(title, bodyFactory, headerExtra) {
   const sec = document.createElement("div");
   sec.className = "match-card__section";
-  const t = document.createElement("p");
+  // <button> (not <p>) so the toggle is keyboard-activatable + screen-reader-announced.
+  const t = document.createElement("button");
+  t.type = "button";
   t.className = "match-card__section-title";
-  t.textContent = title;
+  t.setAttribute("aria-expanded", "true");
+  const label = document.createElement("span");
+  label.className = "match-card__section-title-text";
+  label.textContent = title;
+  t.appendChild(label);
+  if (headerExtra) t.appendChild(headerExtra);
   sec.appendChild(t);
   const body = document.createElement("div");
   body.className = "match-card__section-body";
   body.appendChild(bodyFactory());
   sec.appendChild(body);
-  t.addEventListener("click", () => sec.classList.toggle("match-card__section--open"));
+  t.addEventListener("click", () => {
+    const willOpen = !sec.classList.contains("match-card__section--open");
+    sec.classList.toggle("match-card__section--open", willOpen);
+    t.setAttribute("aria-expanded", willOpen ? "true" : "false");
+  });
   // Default open so the differentiator (cross-chain, repair trace) is visible without an extra click.
   sec.classList.add("match-card__section--open");
   return sec;
