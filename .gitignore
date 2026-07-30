@@ -31,3 +31,12 @@ local_inputs/
 *.key
 *.pem
 secrets/
+
+# Node / Playwright (demo smoke test)
+tests/demo/node_modules/
+tests/demo/.playwright/
+
+# Local font cache for OG image generator (assets/og-template.py).
+# Fonts are read from %LOCALAPPDATA%/Microsoft/Windows/Fonts/ at runtime;
+# this dir is only used for offline font caching and should not be committed.
+assets/fonts/
