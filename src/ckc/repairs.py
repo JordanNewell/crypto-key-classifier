@@ -19,6 +19,14 @@ import binascii
 import base58
 
 from ckc.models import Candidate
+from ckc.repair_labels import (
+    decode_base58,
+    decode_base64,
+    decode_hex,
+    len_repair_delete,
+    len_repair_insert,
+    ocr_sub,
+)
 
 MAX_CANDIDATES = 50
 
@@ -51,7 +59,7 @@ def ocr_substitutions(text: str) -> list[Candidate]:
             cand = Candidate(
                 raw=text,
                 normalized=new,
-                repairs=[f"ocr:{ch}→{replacement}@{i}"],
+                repairs=[ocr_sub(ch, replacement, i)],
                 encoding=None,
                 bytes_value=None,
             )
@@ -71,7 +79,7 @@ def encoding_variants(text: str) -> list[Candidate]:
         b = bytes.fromhex(text)
         candidates.append(
             Candidate(
-                raw=text, normalized=text, repairs=["decode:hex"],
+                raw=text, normalized=text, repairs=[decode_hex(len(b))],
                 encoding="hex", bytes_value=b,
             )
         )
@@ -83,7 +91,7 @@ def encoding_variants(text: str) -> list[Candidate]:
         b = base58.b58decode(text)
         candidates.append(
             Candidate(
-                raw=text, normalized=text, repairs=["decode:base58"],
+                raw=text, normalized=text, repairs=[decode_base58(len(b))],
                 encoding="base58", bytes_value=b,
             )
         )
@@ -95,7 +103,7 @@ def encoding_variants(text: str) -> list[Candidate]:
         b = base64.b64decode(text, validate=True)
         candidates.append(
             Candidate(
-                raw=text, normalized=text, repairs=["decode:base64"],
+                raw=text, normalized=text, repairs=[decode_base64(len(b))],
                 encoding="base64", bytes_value=b,
             )
         )
@@ -133,7 +141,7 @@ def length_repairs(text: str, target_lengths: set[int]) -> list[Candidate]:
                     candidates.append(
                         Candidate(
                             raw=text, normalized=new,
-                            repairs=[f"len-repair:insert@{pos}"],
+                            repairs=[len_repair_insert(pos)],
                             encoding=None, bytes_value=None,
                         )
                     )
@@ -145,7 +153,7 @@ def length_repairs(text: str, target_lengths: set[int]) -> list[Candidate]:
                 candidates.append(
                     Candidate(
                         raw=text, normalized=new,
-                        repairs=[f"len-repair:delete@{pos}"],
+                        repairs=[len_repair_delete(pos)],
                         encoding=None, bytes_value=None,
                     )
                 )

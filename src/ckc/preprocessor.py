@@ -10,6 +10,14 @@ import re
 import unicodedata
 
 from ckc.models import Candidate
+from ckc.repair_labels import (
+    drop_prefix,
+    lowercase,
+    strip_ws,
+    unicode_nfc,
+    uppercase,
+    ws_normalize,
+)
 
 # Known format prefixes that may or may not be part of the canonical form
 PREFIXES_TO_DROP: tuple[str, ...] = ("0x", "0X")
@@ -67,35 +75,45 @@ def preprocess(raw: str) -> list[Candidate]:
     ws_normalized = _normalize_whitespace(raw)
     ws_stripped = _strip_all_whitespace(raw)
 
+    # Count whitespace removed so the trace can report a meaningful number.
+    leading_trailing_ws = max(0, len(raw) - len(raw.strip()))
+    total_ws_stripped = max(0, len(raw) - len(ws_stripped))
+
     # Repairs for the ws-normalized form. When ws_normalized == ws_stripped
     # (single-word input, only leading/trailing ws), "strip-ws" is the accurate
     # label. When they differ (multi-word input with preserved internal spaces),
     # "ws-normalize" is the accurate label.
     if ws_normalized == ws_stripped:
-        ws_norm_repairs = ["strip-ws"] if ws_normalized != raw else []
+        ws_norm_repairs = [strip_ws(total_ws_stripped)] if ws_normalized != raw else []
     else:
-        ws_norm_repairs = ["ws-normalize"] if ws_normalized != raw else []
+        # Leading/trailing chars removed + number of internal whitespace runs collapsed.
+        internal_runs = sum(1 for _ in _WS_RE.finditer(raw.strip()))
+        ws_norm_repairs = (
+            [ws_normalize(leading_trailing_ws, max(0, internal_runs - 1))]
+            if ws_normalized != raw
+            else []
+        )
     add(ws_normalized, ws_norm_repairs)
 
     # Stage 1a-ii: full whitespace strip (no internal spaces, for addresses/keys)
-    strip_repairs = ["strip-ws"] if ws_stripped != raw else []
+    strip_repairs = [strip_ws(total_ws_stripped)] if ws_stripped != raw else []
     if ws_stripped != ws_normalized:
         add(ws_stripped, strip_repairs)
 
     # Stage 1b: prefix drop on ws-stripped form
     for prefix in PREFIXES_TO_DROP:
         if ws_stripped.startswith(prefix):
-            add(ws_stripped[len(prefix):], ["strip-ws", f"drop-prefix:{prefix}"])
+            add(ws_stripped[len(prefix):], [strip_ws(total_ws_stripped), drop_prefix(prefix)])
 
     # Stage 1c: case variants — produce for BOTH ws-normalized and ws-stripped
     # forms so both mnemonic (needs internal spaces) and address/key (no
     # internal spaces) validators get a lowercase candidate.
     base_strip_repairs = strip_repairs
     base_norm_repairs = ws_norm_repairs
-    add(ws_normalized.lower(), [*base_norm_repairs, "lowercase"])
-    add(ws_stripped.lower(), [*base_strip_repairs, "lowercase"])
-    add(ws_normalized.upper(), [*base_norm_repairs, "uppercase"])
-    add(ws_stripped.upper(), [*base_strip_repairs, "uppercase"])
+    add(ws_normalized.lower(), [*base_norm_repairs, lowercase()])
+    add(ws_stripped.lower(), [*base_strip_repairs, lowercase()])
+    add(ws_normalized.upper(), [*base_norm_repairs, uppercase()])
+    add(ws_stripped.upper(), [*base_strip_repairs, uppercase()])
 
     # Identity (no repairs) — added LAST so most-normalized is first
     add(raw, [])
@@ -103,6 +121,6 @@ def preprocess(raw: str) -> list[Candidate]:
     # Unicode NFC normalization as another variant
     nfc = unicodedata.normalize("NFC", ws_stripped)
     if nfc != ws_stripped:
-        add(nfc, ["strip-ws", "unicode-nfc"])
+        add(nfc, [strip_ws(total_ws_stripped), unicode_nfc()])
 
     return candidates

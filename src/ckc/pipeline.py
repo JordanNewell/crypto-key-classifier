@@ -13,6 +13,7 @@ from dataclasses import dataclass
 
 from ckc.models import Candidate, Match
 from ckc.preprocessor import preprocess
+from ckc.repair_labels import slug_of
 from ckc.repairs import MAX_CANDIDATES, encoding_variants, ocr_substitutions
 from ckc.validators import all_validators
 from ckc.validators.base import Validator
@@ -175,7 +176,7 @@ def _adjust_confidence_for_repairs(m: Match) -> None:
     if not m.repairs_applied or m.checksum_status != "valid":
         return  # no repairs = 100 stays; non-valid checksum = don't touch
 
-    repairs = m.repairs_applied
+    repairs = [slug_of(r) for r in m.repairs_applied]
     if any(r.startswith("ocr:") for r in repairs):
         m.confidence = 60
     elif any(r in _ENCODING_REPAIRS for r in repairs):
