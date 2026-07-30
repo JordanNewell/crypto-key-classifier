@@ -13,8 +13,27 @@ def test_strip_whitespace_then_classify():
     results = classify("  1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa  \n")
     top = results[0]
     assert top.chain == "BTC"
-    assert "strip-ws" in top.repairs_applied
+    # Slug is now embedded in a "slug — description" entry, so check via substring.
+    assert any("strip-ws" in r for r in top.repairs_applied)
     assert top.confidence == 85  # valid after minor repair
+
+
+def test_strip_whitespace_emits_human_readable_trace():
+    """Gap 5: repair trace must be human-readable, not a bare slug.
+
+    The whitespace-strip entry should describe what was done in plain English
+    (verb-led, includes the char count) so the ``--explain`` output and the web
+    demo don't need code context to be meaningful.
+    """
+    results = classify("  1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa  \n")
+    top = results[0]
+    ws_entries = [r for r in top.repairs_applied if r.startswith("strip-ws")]
+    assert ws_entries, f"expected a strip-ws entry, got {top.repairs_applied!r}"
+    desc = ws_entries[0].split(" — ", 1)[1]
+    assert desc.startswith("Stripped"), f"should lead with a verb, got {desc!r}"
+    assert "chars of whitespace" in desc
+    # Sanity: at least a few whitespace chars were removed from this input.
+    assert any(token.isdigit() and int(token) > 0 for token in desc.split())
 
 
 def test_cosmos_returns_cross_chain_alternates():

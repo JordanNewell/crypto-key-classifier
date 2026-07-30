@@ -18,6 +18,7 @@ import re
 from importlib import resources
 
 from ckc.models import Candidate, Match
+from ckc.repair_labels import levenshtein
 from ckc.validators.base import levenshtein_distance
 
 
@@ -182,7 +183,7 @@ class MnemonicValidator:
             if idx == len(repair_options):
                 repaired = " ".join(current_words)
                 repairs = [
-                    f"levenshtein:{words[bad_indices[j]]}->{current_words[bad_indices[j]]}"
+                    levenshtein(words[bad_indices[j]], current_words[bad_indices[j]])
                     for j in range(len(bad_indices))
                 ]
                 result.append(Candidate(

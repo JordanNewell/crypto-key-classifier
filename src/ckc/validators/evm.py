@@ -16,6 +16,7 @@ import re
 
 from ckc.data.wallets import wallets_for
 from ckc.models import Candidate, Match
+from ckc.repair_labels import case_eip55
 from ckc.validators.base import keccak256
 
 # 0x + 40 hex (address) OR 0x + 64 hex (private key) OR raw hex without 0x
@@ -148,7 +149,7 @@ class EVMValidator:
                 return [Candidate(
                     raw=candidate.raw,
                     normalized=fixed,
-                    repairs=candidate.repairs + ["case:eip55"],
+                    repairs=candidate.repairs + [case_eip55()],
                     encoding=None, bytes_value=None,
                 )]
             except Exception:

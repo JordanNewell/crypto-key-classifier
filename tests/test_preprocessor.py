@@ -5,7 +5,8 @@ def test_strip_whitespace():
     cands = preprocess("  hello  ")
     assert len(cands) >= 1
     assert cands[0].normalized == "hello"
-    assert "strip-ws" in cands[0].repairs
+    # Slug is now embedded in a "slug — description" entry; substring match.
+    assert any("strip-ws" in r for r in cands[0].repairs)
 
 
 def test_strip_unicode_whitespace():
