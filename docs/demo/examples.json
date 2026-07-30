@@ -28,5 +28,25 @@
     "label": "BIP-39 mnemonic (12 words, test vector 1)",
     "value": "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about",
     "note": "Standard BIP-39 spec test vector. Masked by default — unmasking requires confirmation."
+  },
+  {
+    "label": "Monero address (base58 block-encoded)",
+    "value": "41d7ke5VQnR2BDNSgrTE9j3X8QQ5Bnbbs4s3SMTX7y416CxUJqrTLW97YsWGEBnhxH8tnYDcX85QRAEhaAzrTSrZ89rbBUS",
+    "note": "Synthetic mainnet address (network byte 0x12 + 32-byte spend + 32-byte view pubkey). Monero uses BLOCK-ENCODED base58 (8-byte blocks → 11 chars), not whole-payload — 95 chars total."
+  },
+  {
+    "label": "Cardano address (Shelley bech32)",
+    "value": "addr11qqqsyqcyq5rqwzqfpg9scrgwpugpzysnzs23v9ccrydpkp5df7s",
+    "note": "Synthetic Shelley-era mainnet address (addr1 HRP). Cardano also has a Byron-era base58 format (DdzFFz...) — bech32 is the current standard."
+  },
+  {
+    "label": "Polkadot address (SS58 format)",
+    "value": "112KeSVQBwS9AjRA976mnJouSAoQuS5bkWudT367GBEHCVMa",
+    "note": "Synthetic mainnet SS58 address (prefix 0 + 32-byte ed25519 pubkey). SS58 uses a variable-length Blake2b-512 checksum over the 'SS58PRE' domain separator."
+  },
+  {
+    "label": "Stellar public key (base32 + CRC16-XMODEM)",
+    "value": "GAAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6N5H",
+    "note": "Synthetic G... account key (version byte 0x30 + 32-byte ed25519 pubkey). Triggers the CRC16-XMODEM checksum validator — 56 chars, base32 RFC4648 unpadded."
   }
 ]
