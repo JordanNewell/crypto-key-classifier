@@ -2,9 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>crypto-key-classifier — try it in your browser</title>
   <meta name="description" content="Classify any crypto-key string client-side. BTC / ETH / SOL / Cosmos + ~50 chains. No server, no network calls.">
+  <meta name="theme-color" content="#0A0A0A">
+
+  <!-- Fonts: Space Grotesk (display) + JetBrains Mono (technical) via Fontsource CDN -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/space-grotesk@latest/latin.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/fonts/jetbrains-mono@latest/latin.css">
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 120'><rect width='100' height='120' fill='%230A0A0A'/><line x1='20' y1='20' x2='20' y2='100' stroke='%23FFFFFF' stroke-width='12' stroke-linecap='round'/><line x1='80' y1='20' x2='80' y2='100' stroke='%23FFFFFF' stroke-width='12' stroke-linecap='round'/><line x1='20' y1='20' x2='80' y2='100' stroke='%2300FF41' stroke-width='12' stroke-linecap='round'/></svg>">
+
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -15,7 +24,14 @@
   </div>
 
   <header class="masthead">
-    <div class="masthead__wordmark">— JN</div>
+    <a class="masthead__logo" href="https://github.com/JordanNewell" aria-label="Jordan Newell">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" aria-hidden="true">
+        <line x1="20" y1="20" x2="20" y2="100" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+        <line x1="80" y1="20" x2="80" y2="100" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+        <line x1="20" y1="20" x2="80" y2="100" stroke="currentColor" stroke-width="12" stroke-linecap="round"/>
+      </svg>
+      <span class="masthead__wordmark">NEWELL</span>
+    </a>
     <nav class="masthead__nav">
       <a href="https://github.com/JordanNewell/crypto-key-classifier">src</a>
       <a href="https://pypi.org/project/crypto-key-classifier/">pypi</a>
@@ -32,10 +48,10 @@
     </section>
 
     <section class="safety" aria-label="Safety notice">
-      <span class="safety__icon">[LOCK]</span>
+      <span class="safety__icon">SECURE</span>
       <span class="safety__text">
-        Your input never leaves your browser. Pyodide runs entirely client-side.
-        No telemetry, no server, no key material transmitted.
+        <strong>Your input never leaves your browser.</strong>
+        Pyodide runs entirely client-side. No telemetry, no server, no key material transmitted.
       </span>
     </section>
 
@@ -70,11 +86,7 @@
   </main>
 
   <footer class="footer">
-    <p>
-      Powered by <a href="https://pyodide.org">Pyodide</a> +
-      <a href="https://github.com/JordanNewell/crypto-key-classifier">crypto-key-classifier</a> v0.6.1.
-      MIT licensed.
-    </p>
+    Powered by Pyodide + <a href="https://github.com/JordanNewell/crypto-key-classifier">crypto-key-classifier</a> <span class="version">v0.6.1</span>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
