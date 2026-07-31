@@ -37,12 +37,10 @@ jobs:
         run: pytest -v
 
   # End-to-end smoke test for the Pyodide demo (docs/demo/).
-  # continue-on-error for the first few runs — Pyodide CDN can be flaky and
-  # we don't want to block PR work until the test has proven stable.
-  # Flip `continue-on-error: false` after 3 green runs.
+  # Required: was continue-on-error while the test bed was new; now gating PRs
+  # after multiple green runs.
   demo-smoke:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
