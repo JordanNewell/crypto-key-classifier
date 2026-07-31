@@ -12,6 +12,12 @@
   <a href="https://jordannewell.github.io/crypto-key-classifier/"><strong>► Try it in your browser</strong></a> — paste a key, get the chain + checksum + cross-chain alternates, all client-side via Pyodide. No server, no telemetry.
 </p>
 
+<p align="center">
+  <a href="https://jordannewell.github.io/crypto-key-classifier/">
+    <img src="assets/demo-screenshot.png" alt="Screenshot of the crypto-key-classifier Pyodide demo — paste a key, get the chain + checksum + cross-chain alternates" width="80%">
+  </a>
+</p>
+
 # crypto-key-classifier (`classify-key` / `ckc`)
 
 Classify any plausible crypto-key string — BTC / ETH / SOL / Cosmos family + a dozen more chains, plus BIP-39 and Electrum mnemonics — with aggressive recovery from formatting noise, bad checksums, wrong encodings, and OCR corruption. Recommends compatible wallets and enumerates cross-chain re-encodings for shared-key families (Cosmos IBC, EVM L2s, BTC forks, Polkadot SS58).
