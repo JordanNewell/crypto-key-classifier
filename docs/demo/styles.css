@@ -112,6 +112,23 @@ a:hover { color: var(--color-accent); }
 }
 .masthead__nav a:hover { color: var(--color-primary); }
 
+.masthead__cluster {
+  display: flex; align-items: center; gap: var(--space-4);
+}
+.freshness {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+.freshness a {
+  /* Inside the badge, links are primary green — the canonical "actionable" signal. */
+  color: var(--color-primary);
+  font-weight: 500;
+}
+.freshness a:hover { color: var(--color-accent); }
+
 /* ===== Page ===== */
 .page {
   max-width: 880px;
@@ -238,6 +255,88 @@ a:hover { color: var(--color-accent); }
   font-size: 12px;
   color: var(--color-muted);
   font-style: italic;
+}
+
+.input-panel__meta {
+  display: flex; align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+  min-height: 16px;
+}
+.bulk-indicator {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--space-2);
+  background: var(--color-surface);
+}
+.input-panel__hint {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-muted);
+  opacity: 0.75;
+  font-style: italic;
+}
+
+.input-panel__toggle--danger span { color: var(--color-text); }
+.input-panel__toggle--danger input[type="checkbox"]:checked + span {
+  /* The .input-panel__toggle rule above styles :checked + span muted→text; for the
+     danger variant we accent the label green so the ON state reads as "armed." */
+  color: var(--color-primary);
+}
+
+/* ===== Unmask banner ===== */
+.unmask-banner {
+  display: flex; align-items: flex-start; gap: var(--space-3);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-4) 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text);
+  letter-spacing: 0.3px;
+}
+.unmask-banner__glyph {
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1;
+}
+.unmask-banner__text strong {
+  color: var(--color-primary);
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+/* ===== Key groups (bulk mode) ===== */
+.key-group {
+  margin-bottom: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: rgba(15, 15, 15, 0.4);
+}
+.key-group__label {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+}
+.key-group__label-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-primary);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  word-break: break-all;
 }
 
 /* ===== Buttons ===== */
@@ -495,12 +594,32 @@ a:hover { color: var(--color-accent); }
 /* ===== Footer ===== */
 .footer {
   border-top: 1px solid var(--color-border);
-  padding: var(--space-6);
-  text-align: center;
+  padding: var(--space-5) var(--space-6);
+  display: flex; flex-direction: column;
+  align-items: center; gap: var(--space-3);
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--color-muted);
   letter-spacing: 0.3px;
 }
+.footer__links {
+  display: flex; flex-wrap: wrap;
+  align-items: center; justify-content: center;
+  gap: var(--space-4);
+}
+.footer__link {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-transform: lowercase;
+  letter-spacing: 0.5px;
+  padding: var(--space-1) 0;
+  transition: color 120ms ease;
+}
+.footer__link:hover { color: var(--color-primary); }
+.footer__icon { width: 14px; height: 14px; flex-shrink: 0; }
+.footer__count { color: var(--color-primary); font-weight: 500; }
+.footer__credit { text-align: center; }
 .footer a { color: var(--color-primary); }
 .footer .version { color: var(--color-text); }

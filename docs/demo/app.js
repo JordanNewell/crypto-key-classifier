@@ -9,11 +9,16 @@ const els = {
   loader:        document.getElementById("loader"),
   input:         document.getElementById("key-input"),
   explainToggle: document.getElementById("explain-toggle"),
+  unmaskToggle:  document.getElementById("unmask-toggle"),
   exampleSelect: document.getElementById("example-select"),
   exampleNote:   document.getElementById("example-note"),
   classifyBtn:   document.getElementById("classify-btn"),
   clearBtn:      document.getElementById("clear-btn"),
+  bulkIndicator: document.getElementById("bulk-indicator"),
+  unmaskBanner:  document.getElementById("unmask-banner"),
   results:       document.getElementById("results"),
+  freshness:     document.getElementById("freshness"),
+  starCount:     document.getElementById("star-count"),
 };
 
 let classifyFn = null;
@@ -108,6 +113,103 @@ async function loadExamples() {
   return examplesCache;
 }
 
+function compareVersions(a, b) {
+  // Loose dotted-numeric compare; non-numeric suffixes (-rc1, +build) are ignored.
+  const pa = String(a).split("."); const pb = String(b).split(".");
+  const len = Math.max(pa.length, pb.length);
+  for (let i = 0; i < len; i++) {
+    const ai = parseInt(pa[i] || "0", 10) || 0;
+    const bi = parseInt(pb[i] || "0", 10) || 0;
+    if (ai !== bi) return ai < bi ? -1 : 1;
+  }
+  return 0;
+}
+
+async function refreshFreshness() {
+  // PyPI JSON supports CORS. Silent-fail: stale info is worse than no info.
+  try {
+    const res = await fetch("https://pypi.org/pypi/crypto-key-classifier/json");
+    if (!res.ok) return;
+    const data = await res.json();
+    const latest = data && data.info && data.info.version;
+    if (!latest) return;
+    renderFreshness(latest);
+  } catch {
+    /* network/CORS/down — just leave the badge hidden */
+  }
+}
+
+function renderFreshness(latest) {
+  const el = els.freshness;
+  if (!el) return;
+  const cmp = compareVersions(CKC_VERSION, latest);
+  if (cmp === 0) {
+    el.textContent = "v" + CKC_VERSION + " · latest";
+    el.classList.remove("freshness--stale");
+    el.removeAttribute("href");
+  } else {
+    el.classList.add("freshness--stale");
+    el.textContent = "";
+    el.appendChild(document.createTextNode("v" + CKC_VERSION + " → "));
+    const link = document.createElement("a");
+    link.href = "https://pypi.org/project/crypto-key-classifier/";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = latest;
+    el.appendChild(link);
+    el.appendChild(document.createTextNode(" available"));
+  }
+  el.hidden = false;
+}
+
+async function refreshStarCount() {
+  // Unauthenticated GitHub REST is rate-limited per IP; cache in sessionStorage so
+  // subsequent loads (common with PWA/SW offline retries) don't burn the budget.
+  const KEY = "ckc-demo:stars";
+  try {
+    const cached = sessionStorage.getItem(KEY);
+    if (cached) { renderStarCount(cached); return; }
+    const res = await fetch("https://api.github.com/repos/JordanNewell/crypto-key-classifier");
+    if (!res.ok) return;
+    const data = await res.json();
+    const count = data && typeof data.stargazers_count === "number"
+      ? String(data.stargazers_count)
+      : null;
+    if (!count) return;
+    sessionStorage.setItem(KEY, count);
+    renderStarCount(count);
+  } catch {
+    /* rate-limited or offline — just hide count */
+  }
+}
+
+function renderStarCount(count) {
+  const el = els.starCount;
+  if (!el) return;
+  el.textContent = " " + count;
+  el.hidden = false;
+}
+
+function splitBulkKeys(input) {
+  // Split on newlines, drop empties. Single-line input returns a 1-element array,
+  // which keeps the non-bulk render path as a strict subset of the bulk path.
+  // DO NOT trim the line itself — classify()'s preprocessor handles whitespace,
+  // and trimming here would mask the strip-ws repair that the demo exists to show.
+  return input
+    .split(/\r\n|\r|\n/)
+    .filter((line) => line.trim().length > 0);
+}
+
+function updateBulkIndicator() {
+  const keys = splitBulkKeys(els.input.value);
+  if (keys.length >= 2) {
+    els.bulkIndicator.textContent = "Bulk mode: " + keys.length + " keys";
+    els.bulkIndicator.hidden = false;
+  } else {
+    els.bulkIndicator.hidden = true;
+  }
+}
+
 function init() {
   els.classifyBtn.disabled = true;
   els.clearBtn.addEventListener("click", () => {
@@ -115,6 +217,7 @@ function init() {
     els.results.innerHTML = "";
     els.exampleSelect.value = "";
     els.exampleNote.hidden = true;
+    updateBulkIndicator();
     if (window.location.hash) {
       history.replaceState(null, "", window.location.pathname + window.location.search);
     }
@@ -139,7 +242,10 @@ function init() {
       els.exampleNote.textContent = match.note;
       els.exampleNote.hidden = false;
     }
+    updateBulkIndicator();
   });
+  els.input.addEventListener("input", updateBulkIndicator);
+  initUnmaskToggle();
 }
 
 init();
@@ -151,6 +257,9 @@ init();
     els.classifyBtn.disabled = false;
     hideLoader();
     els.input.focus();
+    // Fire-and-forget; failure is silent and doesn't block the demo.
+    refreshFreshness();
+    refreshStarCount();
   } catch (err) {
     console.error("boot failed", err);
     setLoader("Boot failed.");
@@ -171,13 +280,49 @@ function classifyAndRender() {
   els.results.innerHTML = "";
   if (!input || !input.trim()) return;
 
+  const keys = splitBulkKeys(input);
+  if (keys.length === 0) return;
+
+  const isBulk = keys.length >= 2;
+  const globalUnmask = !!(els.unmaskToggle && els.unmaskToggle.checked);
+
+  if (isBulk) {
+    for (let i = 0; i < keys.length; i++) {
+      els.results.appendChild(renderKeyGroup(keys[i], i + 1, keys.length, globalUnmask));
+    }
+  } else {
+    els.results.appendChild(renderKeyGroup(keys[0], 1, 1, globalUnmask));
+  }
+}
+
+function renderKeyGroup(rawKey, idx, total, globalUnmask) {
+  // Group wrapper: holds the label + each Match card. Even single-key renders go
+  // through this so the layout math stays uniform.
+  const group = document.createElement("div");
+  group.className = "key-group";
+
+  const label = document.createElement("div");
+  label.className = "key-group__label";
+  const labelTxt = document.createElement("span");
+  labelTxt.className = "key-group__label-text";
+  if (total > 1) {
+    labelTxt.textContent = "Key " + idx + "/" + total + ": " + truncateKey(rawKey) + "…";
+  } else {
+    labelTxt.textContent = "Input: " + truncateKey(rawKey) + "…";
+  }
+  label.appendChild(labelTxt);
+  label.appendChild(makeCopyButton(() => rawKey));
+  group.appendChild(label);
+
   let matches;
   try {
-    // classify(raw) returns a Python list[Match]; .toJs() converts to JS Array.
-    matches = classifyFn(input).toJs();
+    matches = classifyFn(rawKey).toJs();
   } catch (err) {
-    showError("Classifier threw: " + String(err && err.message ? err.message : err));
-    return;
+    const p = document.createElement("p");
+    p.className = "results__error";
+    p.textContent = "Classifier threw: " + String(err && err.message ? err.message : err);
+    group.appendChild(p);
+    return group;
   }
 
   if (!matches || matches.length === 0) {
@@ -188,16 +333,22 @@ function classifyAndRender() {
     } else {
       p.textContent = "No classifier matched this input. Try enabling 'Show repair trace'.";
     }
-    els.results.appendChild(p);
-    return;
+    group.appendChild(p);
+    return group;
   }
 
   for (const m of matches) {
-    els.results.appendChild(renderMatch(m));
+    group.appendChild(renderMatch(m, rawKey, globalUnmask));
   }
+  return group;
 }
 
-function renderMatch(m) {
+function truncateKey(raw) {
+  if (raw.length <= 16) return raw;
+  return raw.slice(0, 16);
+}
+
+function renderMatch(m, rawKey, globalUnmask) {
   // m is a Python Match dataclass accessed via attribute.
   const card = document.createElement("article");
   card.className = "match-card";
@@ -240,7 +391,7 @@ function renderMatch(m) {
   }
   card.appendChild(dl);
 
-  // Input row (masked if sensitive)
+  // Input row (masked if sensitive, unless global unmask is on)
   const keyRow = document.createElement("div");
   keyRow.className = "match-card__row";
   const keyLabel = document.createElement("span");
@@ -248,7 +399,7 @@ function renderMatch(m) {
   const keySpan = document.createElement("span");
   keySpan.className = "match-card__key";
   keySpan.dataset.sensitive = isSensitive(m) ? "1" : "0";
-  renderMaskedKey(keySpan, els.input.value);
+  renderMaskedKey(keySpan, rawKey, globalUnmask);
   keyRow.appendChild(keyLabel);
   keyRow.appendChild(keySpan);
   card.appendChild(keyRow);
@@ -321,7 +472,7 @@ function isSensitive(m) {
   return m.key_type === "private-key" || m.key_type === "mnemonic";
 }
 
-function renderMaskedKey(span, raw) {
+function renderMaskedKey(span, raw, globalUnmask) {
   const sensitive = span.dataset.sensitive === "1";
   span.textContent = "";
   if (!sensitive) {
@@ -329,6 +480,12 @@ function renderMaskedKey(span, raw) {
     return;
   }
   span.dataset.raw = raw;
+  // Global unmask = on: render unmasked, skip the per-card button (redundant).
+  if (globalUnmask) {
+    span.dataset.unmasked = "1";
+    span.appendChild(document.createTextNode(raw));
+    return;
+  }
   span.dataset.unmasked = "0";
   span.appendChild(document.createTextNode(maskValue(raw)));
   span.appendChild(makeUnmaskButton(span, raw));
@@ -443,6 +600,38 @@ function listToJs(v) {
   if (typeof v.toJs === "function") return v.toJs();
   if (Array.isArray(v)) return v;
   return [];
+}
+
+function initUnmaskToggle() {
+  const toggle = els.unmaskToggle;
+  if (!toggle) return;
+  // The browser flips the checkbox state before our click handler fires.
+  // We intercept the flip: if it's the OFF→ON transition, we cancel, run the
+  // three confirms, and set the final state ourselves.
+  toggle.addEventListener("click", () => {
+    if (!toggle.checked) {
+      // User just turned it OFF — instant, no confirm. Let the change handler do the rest.
+      return;
+    }
+    // User just turned it ON — undo immediately, then re-check only if they pass 3 confirms.
+    toggle.checked = false;
+    const ok =
+      window.confirm("Revealing keys will display private keys in plaintext. Continue?") &&
+      window.confirm("Are you sure? Shoulder-surfing and screen recording risks apply.") &&
+      window.confirm("Final confirmation: display all keys unmasked?");
+    if (ok) {
+      toggle.checked = true;
+    }
+  });
+  toggle.addEventListener("change", () => {
+    showUnmaskBanner(toggle.checked);
+  });
+  // Restore banner visibility if the toggle was somehow left on across re-render.
+  showUnmaskBanner(toggle.checked);
+}
+
+function showUnmaskBanner(visible) {
+  if (els.unmaskBanner) els.unmaskBanner.hidden = !visible;
 }
 
 els.classifyBtn.addEventListener("click", classifyAndRender);
