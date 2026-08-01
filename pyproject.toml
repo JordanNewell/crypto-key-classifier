@@ -8,11 +8,23 @@ version = "0.6.1"
 description = "Classify any crypto-key string (BTC/ETH/SOL/Cosmos + more) with aggressive recovery from corruption"
 readme = "README.md"
 requires-python = ">=3.10"
-license = { text = "MIT" }
+license = "MIT"
 authors = [{ name = "Jordan Newell" }]
 dependencies = [
     "base58>=2.1.1",
     "pycryptodome>=3.20",
+]
+keywords = [
+    "crypto",
+    "bitcoin",
+    "ethereum",
+    "solana",
+    "cosmos",
+    "bip39",
+    "key-recovery",
+    "blockchain",
+    "forensics",
+    "cli",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -36,6 +48,8 @@ classifiers = [
 
 [project.urls]
 Homepage = "https://github.com/JordanNewell/crypto-key-classifier"
+Documentation = "https://jordannewell.github.io/crypto-key-classifier/"
+Source = "https://github.com/JordanNewell/crypto-key-classifier"
 Repository = "https://github.com/JordanNewell/crypto-key-classifier"
 Changelog = "https://github.com/JordanNewell/crypto-key-classifier/blob/main/CHANGELOG.md"
 Issues = "https://github.com/JordanNewell/crypto-key-classifier/issues"
