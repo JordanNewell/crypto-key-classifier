@@ -2,15 +2,13 @@
 
 ## Reporting a vulnerability
 
-Email **security@jordannewell.com**. PGP-encrypted reports are welcome —
-locate the key via Web Key Directory:
+Email **security@jordannewell.com** with a description of the issue, the
+steps to reproduce, the affected version (`classify-key --version`), and
+any suggested fix.
 
-```bash
-gpg --auto-key-locate clear,dkd,nodefault --locate-key jordan@jordannewell.com
-```
-
-Fingerprint: `67567DC5E7C5353F85F2AF0DAC05D3F3E0EFA32A` (Ed25519, see
-[`SIGNATURE.md`](SIGNATURE.md) for full details).
+A PGP key is not configured for this address yet. If you need to send an
+encrypted report, say so in your first email and we will arrange a key
+exchange out of band.
 
 **Do not open a public GitHub issue** for security reports.
 
@@ -41,21 +39,26 @@ in [`tests/fixtures/`](tests/fixtures/) or generate a fresh throwaway key.
 
 In scope:
 
-- `classify-key` CLI behavior
-- The `ckc` Python package (`src/ckc/`)
-- Output masking, file handling, stdin handling
-- The repair pipeline's interaction with untrusted input
+- The `crypto-key-classifier` source tree (`src/ckc/`, CLI entry point,
+  test fixtures, build config)
+- The `classify-key` CLI behavior — input handling, output masking,
+  file/stdin handling, the repair pipeline's interaction with untrusted
+  input
+- The demo site at
+  <https://jordannewell.github.io/crypto-key-classifier/> (Pyodide build,
+  in-browser key handling, client-side behavior)
 
 Out of scope:
 
-- Vulnerabilities in upstream dependencies (`base58`, `pycryptodome`) —
-  report those to the upstream project
+- Vulnerabilities in upstream dependencies (`base58`, `pycryptodome`,
+  Pyodide, etc.) — report those to the upstream project
 - Issues that require the user to deliberately defeat safety guards
   (e.g., piping `--no-mask` output to a public log)
 
 ## Trust boundary
 
 `classify-key` is **offline by design**. It makes zero network calls and
-writes nothing to disk unless the user explicitly redirects output. Any
-report claiming network exfiltration will be verified against this
-invariant before acceptance.
+writes nothing to disk unless the user explicitly redirects output. The
+demo site runs entirely client-side via Pyodide — keys never leave the
+browser. Any report claiming network exfiltration will be verified
+against this invariant before acceptance.

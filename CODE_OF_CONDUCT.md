@@ -29,7 +29,7 @@ disagreements that turn personal are not.
 
 ## Enforcement
 
-Violations can be reported to **jordan@jordannewell.com**. All reports
+Violations can be reported to **conduct@jordannewell.com**. All reports
 are reviewed and handled with discretion.
 
 Enforcement may include warning, removal of contributions, or ban from

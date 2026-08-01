@@ -1,5 +1,6 @@
 name: Bug report
 description: Report incorrect behavior in classify-key. For security issues, see SECURITY.md instead.
+title: "[bug] "
 labels: ["bug"]
 body:
   - type: markdown
@@ -10,6 +11,17 @@ body:
         **Security-sensitive issues** (masking bypasses, key leakage, output
         formatting that could expose key material): do **not** use this form.
         See [SECURITY.md](../blob/main/SECURITY.md) for the private reporting path.
+
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: Preflight
+      description: Please verify before submitting.
+      options:
+        - label: I searched the existing issues and did not find a duplicate.
+          required: true
+        - label: This is not a security issue (masking bypass, key leakage). If it is, use SECURITY.md instead.
+          required: true
 
   - type: input
     id: version
@@ -39,7 +51,7 @@ body:
   - type: dropdown
     id: chain
     attributes:
-      label: Chain / key type
+      label: Chain / key type (if known)
       options:
         - BTC (address / WIF)
         - ETH / EVM (address / private key)
@@ -54,15 +66,37 @@ body:
         - Other / multiple
         - N/A (not chain-specific)
     validations:
+      required: false
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What's wrong, in one or two sentences.
+    validations:
       required: true
 
   - type: textarea
-    id: command
+    id: reproduce
     attributes:
-      label: Command
-      description: The exact `classify-key` invocation.
+      label: Steps to reproduce
+      description: The exact `classify-key` invocation(s).
       render: shell
       placeholder: "classify-key --explain bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    validations:
+      required: true
+
+  - type: textarea
+    id: explain
+    attributes:
+      label: Output of `classify-key --explain`
+      description: |
+        Paste the actual output of `classify-key --explain <input>`. The
+        repair trace is the fastest way for us to reproduce and diagnose.
+
+        **Never paste a real mainnet private key or seed phrase.** Use a
+        throwaway key or one of the public test vectors in `tests/fixtures/`.
+      render: shell
     validations:
       required: true
 
@@ -75,20 +109,7 @@ body:
       required: true
 
   - type: textarea
-    id: actual
-    attributes:
-      label: Actual output
-      description: |
-        Paste the actual output. Use `--explain` for the full repair trace.
-
-        **Never paste a real mainnet private key or seed phrase.** Use a
-        throwaway key or one of the public test vectors in `tests/fixtures/`.
-      render: shell
-    validations:
-      required: true
-
-  - type: textarea
     id: notes
     attributes:
       label: Additional context
-      description: Anything else relevant. Workarounds you tried, related issues, etc.
+      description: Workarounds you tried, related issues, screenshots, etc.

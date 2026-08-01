@@ -20,6 +20,8 @@
 - [ ] `pytest` green (239+ tests)
 - [ ] If new validator: added public test vectors under `tests/fixtures/` (no real mainnet keys)
 - [ ] If new validator: added a property test under `tests/fuzz/`
+- [ ] Public-test-vectors-only policy respected (no real mainnet keys anywhere in the diff)
+- [ ] CHANGELOG.md updated if user-facing
 - [ ] README updated (validator table, examples, or changelog reference)
 - [ ] Commits signed
 - [ ] No AI-attribution trailers (`Co-Authored-By: Claude`, etc.)

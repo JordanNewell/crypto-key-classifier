@@ -1,5 +1,6 @@
 name: Feature request
 description: Suggest a new chain, validator improvement, or feature.
+title: "[feat] "
 labels: ["enhancement"]
 body:
   - type: markdown
@@ -8,6 +9,14 @@ body:
         Thanks for the suggestion. New chain validators are the most common
         contribution — see [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md)
         for the recipe.
+
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched the existing issues and did not find a duplicate.
+          required: true
 
   - type: dropdown
     id: kind
@@ -50,4 +59,4 @@ body:
     id: context
     attributes:
       label: Additional context
-      description: Links to specs, BIPs, existing tools, or test vectors.
+      description: Links to specs, BIPs, existing tools, or public test vectors.
