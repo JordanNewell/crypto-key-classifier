@@ -3,7 +3,7 @@
 // works at http://127.0.0.1:8000/ (root scope) and
 // https://jordannewell.github.io/crypto-key-classifier/ (subpath scope).
 
-const CACHE_NAME = "ckc-demo-v1";
+const CACHE_NAME = "ckc-demo-v2";
 
 // Same-origin shell assets. Relative URLs resolve against self.location.href.
 const SHELL_ASSETS = [

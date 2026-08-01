@@ -48,5 +48,15 @@
     "label": "Stellar public key (base32 + CRC16-XMODEM)",
     "value": "GAAACAQDAQCQMBYIBEFAWDANBYHRAEISCMKBKFQXDAMRUGY4DUPB6N5H",
     "note": "Synthetic G... account key (version byte 0x30 + 32-byte ed25519 pubkey). Triggers the CRC16-XMODEM checksum validator — 56 chars, base32 RFC4648 unpadded."
+  },
+  {
+    "label": "BIP-340 x-only pubkey (secp256k1)",
+    "value": "F9308A019258C31049344F85F89D5229B531C845836F99B08601F113BCE036F9",
+    "note": "Official BIP-340 schnorr test vector #0 (secret key = 3). 32-byte x-only secp256k1 pubkey, 64 hex chars. Source: github.com/bitcoin/bips/blob/master/bip-0340/test-vectors.csv. Spec test vector — never on mainnet."
+  },
+  {
+    "label": "ETH contract address (EIP-55 checksum)",
+    "value": "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D",
+    "note": "Uniswap V2 Router02 contract address on mainnet Ethereum. Public on-chain contract (not a private key). EIP-55 checksum is valid — mixed-case hex encoding. Source: Uniswap docs + Etherscan verified contract."
   }
 ]
