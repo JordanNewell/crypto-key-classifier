@@ -14,15 +14,24 @@ const els = {
   exampleNote:   document.getElementById("example-note"),
   classifyBtn:   document.getElementById("classify-btn"),
   clearBtn:      document.getElementById("clear-btn"),
+  shareBtn:      document.getElementById("share-btn"),
+  downloadBtn:   document.getElementById("download-btn"),
+  historyBtn:    document.getElementById("history-btn"),
+  historyPopover:document.getElementById("history-popover"),
   bulkIndicator: document.getElementById("bulk-indicator"),
   unmaskBanner:  document.getElementById("unmask-banner"),
   results:       document.getElementById("results"),
   freshness:     document.getElementById("freshness"),
   starCount:     document.getElementById("star-count"),
+  shortcutsOverlay: document.getElementById("shortcuts-overlay"),
 };
 
 let classifyFn = null;
 let examplesCache = null;
+// Most-recent classify output, used by Download JSON. Reset on every classify().
+let lastResults = null;
+const HISTORY_KEY = "ckc-history";
+const HISTORY_MAX = 5;
 
 function setLoader(message, hint) {
   els.loader.querySelector(".loader__text").textContent = message;
@@ -79,20 +88,121 @@ function findOptionBySlug(slug) {
   return null;
 }
 
-function applyHashExample() {
+// ===== Share URL =====
+// Encoding scheme (URL-safe, no padding):
+//   #example=<slug>           — example-only share (preserved for backward compat)
+//   #k=<b64url>               — arbitrary input + toggle state
+// The b64url payload is a tiny JSON: {"k":input,"e":explain,"u":unmask}
+// Keys kept single-char to keep URLs short. Input is the user's paste, so
+// we encode (not encrypt) — the hash is plaintext to anyone who reads the URL.
+function b64urlEncode(str) {
+  // UTF-8 safe: TextEncoder → bytes → base64 → url-safe.
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  const b64 = btoa(bin);
+  return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function b64urlDecode(str) {
+  const pad = str.length % 4 === 0 ? "" : "=".repeat(4 - (str.length % 4));
+  const b64 = (str + pad).replace(/-/g, "+").replace(/_/g, "/");
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
+}
+
+function buildSharePayload() {
+  const payload = {
+    k: els.input.value || "",
+    e: !!(els.explainToggle && els.explainToggle.checked),
+    u: !!(els.unmaskToggle && els.unmaskToggle.checked),
+  };
+  return JSON.stringify(payload);
+}
+
+function buildShareHash() {
+  // Empty input → no shareable state. Fall back to clearing the hash.
+  if (!els.input.value || !els.input.value.trim()) return "";
+  return "#k=" + b64urlEncode(buildSharePayload());
+}
+
+function readShareFromHash() {
   const hash = window.location.hash || "";
-  const match = hash.match(/^#example=(.+)$/);
-  if (!match) return;
-  const slug = decodeURIComponent(match[1]);
-  const opt = findOptionBySlug(slug);
-  if (!opt) return;
-  els.exampleSelect.value = opt.value;
-  els.input.value = opt.value;
-  const ex = (examplesCache || []).find((x) => x.value === opt.value);
-  if (ex && ex.note) {
-    els.exampleNote.textContent = ex.note;
-    els.exampleNote.hidden = false;
+  const exMatch = hash.match(/^#example=(.+)$/);
+  if (exMatch) {
+    const slug = decodeURIComponent(exMatch[1]);
+    const opt = findOptionBySlug(slug);
+    if (!opt) return null;
+    return {
+      input: opt.value,
+      explain: false,
+      unmask: false,
+      exampleSlug: slug,
+      exampleValue: opt.value,
+    };
   }
+  const kMatch = hash.match(/^#k=(.+)$/);
+  if (!kMatch) return null;
+  try {
+    const payload = JSON.parse(b64urlDecode(kMatch[1]));
+    if (typeof payload !== "object" || payload === null) return null;
+    return {
+      input: typeof payload.k === "string" ? payload.k : "",
+      explain: !!payload.e,
+      unmask: !!payload.u,
+    };
+  } catch {
+    return null;
+  }
+}
+
+function applyShareState(state) {
+  if (!state) return false;
+  if (typeof state.explain === "boolean" && els.explainToggle) {
+    els.explainToggle.checked = state.explain;
+  }
+  // Unmask requires the 3-confirmation flow on manual toggle. A share URL with
+  // unmask=true is opt-in by the sender, but we still force it off on load and
+  // let the user re-arm it — auto-revealing keys via a clicked link is a footgun.
+  if (els.unmaskToggle) els.unmaskToggle.checked = false;
+  showUnmaskBanner(false);
+
+  if (state.exampleValue) {
+    els.exampleSelect.value = state.exampleValue;
+    const ex = (examplesCache || []).find((x) => x.value === state.exampleValue);
+    if (ex && ex.note) {
+      els.exampleNote.textContent = ex.note;
+      els.exampleNote.hidden = false;
+    }
+  } else {
+    els.exampleSelect.value = "";
+    els.exampleNote.hidden = true;
+  }
+  els.input.value = state.input || "";
+  updateBulkIndicator();
+  return true;
+}
+
+function syncHashFromState() {
+  const hash = buildShareHash();
+  const current = window.location.hash || "";
+  if (current === hash) return;
+  if (hash) {
+    history.replaceState(null, "", hash);
+  } else if (current) {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+  }
+  // Share button is live whenever there is shareable input.
+  const hasInput = !!(els.input.value && els.input.value.trim());
+  if (els.shareBtn) els.shareBtn.disabled = !hasInput;
+}
+
+function applyHashExample() {
+  // Deprecated — superseded by readShareFromHash() + applyShareState() in the
+  // boot flow. Kept as a no-op stub so any external callers don't throw.
+  return false;
 }
 
 async function loadExamples() {
@@ -109,7 +219,8 @@ async function loadExamples() {
     opt.dataset.slug = slugify(ex.label);
     els.exampleSelect.appendChild(opt);
   }
-  applyHashExample();
+  // Share-state application happens in the boot flow after Pyodide is ready,
+  // so auto-classify doesn't fire before classifyFn is wired.
   return examplesCache;
 }
 
@@ -217,35 +328,43 @@ function init() {
     els.results.innerHTML = "";
     els.exampleSelect.value = "";
     els.exampleNote.hidden = true;
+    lastResults = null;
+    updateDownloadBtn();
     updateBulkIndicator();
-    if (window.location.hash) {
-      history.replaceState(null, "", window.location.pathname + window.location.search);
-    }
+    syncHashFromState();
     els.input.focus();
   });
   els.exampleSelect.addEventListener("change", (e) => {
     const value = e.target.value;
     const selected = e.target.options[e.target.selectedIndex];
-    const slug = selected && selected.dataset.slug;
     if (!value) {
       els.exampleNote.hidden = true;
-      if (window.location.hash) {
-        history.replaceState(null, "", window.location.pathname + window.location.search);
-      }
+      els.input.value = "";
+      updateBulkIndicator();
+      syncHashFromState();
       return;
     }
     els.input.value = value;
-    // Sync URL hash so the URL is shareable for this example.
-    history.replaceState(null, "", "#example=" + encodeURIComponent(slug));
     const match = (examplesCache || []).find((x) => x.value === value);
     if (match) {
       els.exampleNote.textContent = match.note;
       els.exampleNote.hidden = false;
     }
     updateBulkIndicator();
+    syncHashFromState();
   });
-  els.input.addEventListener("input", updateBulkIndicator);
+  els.input.addEventListener("input", () => {
+    updateBulkIndicator();
+    // Live-update the share hash so the URL is always deep-linkable to current state.
+    // We do NOT auto-clear the example dropdown here — that would lose the note.
+    syncHashFromState();
+  });
+  els.explainToggle.addEventListener("change", syncHashFromState);
   initUnmaskToggle();
+  initShareButton();
+  initDownloadButton();
+  initHistoryPopover();
+  initKeyboardShortcuts();
 }
 
 init();
@@ -256,10 +375,22 @@ init();
     await bootPyodide();
     els.classifyBtn.disabled = false;
     hideLoader();
-    els.input.focus();
+    // Apply any share state from the URL hash BEFORE focusing the input —
+    // a share link should auto-populate + auto-classify on load.
+    const shared = readShareFromHash();
+    if (shared && shared.input) {
+      applyShareState(shared);
+      // Auto-classify so the share recipient sees results immediately.
+      classifyAndRender();
+    } else {
+      els.input.focus();
+    }
     // Fire-and-forget; failure is silent and doesn't block the demo.
     refreshFreshness();
     refreshStarCount();
+    updateHistoryBtn();
+    updateDownloadBtn();
+    syncHashFromState();
   } catch (err) {
     console.error("boot failed", err);
     setLoader("Boot failed.");
@@ -278,6 +409,8 @@ function classifyAndRender() {
   // Trimming here would mask the very repair features the demo exists to show off.
   const input = els.input.value;
   els.results.innerHTML = "";
+  lastResults = null;
+  updateDownloadBtn();
   if (!input || !input.trim()) return;
 
   const keys = splitBulkKeys(input);
@@ -286,16 +419,34 @@ function classifyAndRender() {
   const isBulk = keys.length >= 2;
   const globalUnmask = !!(els.unmaskToggle && els.unmaskToggle.checked);
 
+  const collected = [];
   if (isBulk) {
     for (let i = 0; i < keys.length; i++) {
-      els.results.appendChild(renderKeyGroup(keys[i], i + 1, keys.length, globalUnmask));
+      const group = renderKeyGroup(keys[i], i + 1, keys.length, globalUnmask, collected);
+      els.results.appendChild(group);
     }
   } else {
-    els.results.appendChild(renderKeyGroup(keys[0], 1, 1, globalUnmask));
+    els.results.appendChild(renderKeyGroup(keys[0], 1, 1, globalUnmask, collected));
   }
+
+  // Persist results for Download JSON.
+  if (collected.length > 0) {
+    lastResults = {
+      generatedAt: new Date().toISOString(),
+      input: keys,
+      results: collected,
+    };
+    updateDownloadBtn();
+    // History tracks the raw input(s). Multiple keys → one combined entry
+    // joined by newlines so the user gets the full bulk set back on click.
+    addToHistory(keys.join("\n"));
+  }
+
+  // Refresh the share hash so it reflects the just-classified state.
+  syncHashFromState();
 }
 
-function renderKeyGroup(rawKey, idx, total, globalUnmask) {
+function renderKeyGroup(rawKey, idx, total, globalUnmask, collected) {
   // Group wrapper: holds the label + each Match card. Even single-key renders go
   // through this so the layout math stays uniform.
   const group = document.createElement("div");
@@ -339,8 +490,42 @@ function renderKeyGroup(rawKey, idx, total, globalUnmask) {
 
   for (const m of matches) {
     group.appendChild(renderMatch(m, rawKey, globalUnmask));
+    if (collected) collected.push(serializeMatch(m, rawKey));
   }
   return group;
+}
+
+// Snapshot a Match dataclass into a plain JSON-safe object. We pull every
+// attribute defensively because the Pydantic schema may grow across versions —
+// unknown attrs are silently dropped rather than crashing the download.
+function serializeMatch(m, rawKey) {
+  const out = {
+    input: rawKey,
+    chain: getattr(m, "chain"),
+    format: getattr(m, "format"),
+    key_type: getattr(m, "key_type"),
+    confidence: getattr(m, "confidence"),
+    checksum_status: getattr(m, "checksum_status"),
+    network: getattr(m, "network"),
+    notes: listToJs(getattr(m, "notes")),
+    wallet_compatibility: listToJs(getattr(m, "wallet_compatibility")),
+    repairs_applied: listToJs(getattr(m, "repairs_applied")),
+  };
+  const alts = listToJs(getattr(m, "cross_chain_alternates"));
+  out.cross_chain_alternates = alts.map((pair) => {
+    if (Array.isArray(pair)) return [pair[0], pair[1]];
+    if (pair && typeof pair.get === "function") return [pair.get(0), pair.get(1)];
+    return [String(pair)];
+  });
+  return out;
+}
+
+function getattr(obj, name) {
+  if (obj == null) return null;
+  if (typeof obj.get === "function" && (name === 0 || typeof name === "string")) {
+    try { return obj.get(name); } catch { /* fall through */ }
+  }
+  return obj[name];
 }
 
 function truncateKey(raw) {
@@ -635,9 +820,318 @@ function showUnmaskBanner(visible) {
 }
 
 els.classifyBtn.addEventListener("click", classifyAndRender);
-els.input.addEventListener("keydown", (e) => {
+
+// ===== Keyboard shortcuts =====
+function isTypingTarget(el) {
+  if (!el) return false;
+  const tag = el.tagName;
+  return tag === "TEXTAREA" || tag === "INPUT" || tag === "SELECT" || el.isContentEditable;
+}
+
+document.addEventListener("keydown", (e) => {
+  // Cmd/Ctrl+Enter → classify (works anywhere on the page).
   if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
     classifyAndRender();
+    return;
+  }
+  // Cmd/Ctrl+K → focus + select the key input.
+  if (e.key.toLowerCase() === "k" && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    els.input.focus();
+    els.input.select();
+    return;
+  }
+  // ? → toggle the shortcuts overlay (only when NOT typing in an input).
+  if (e.key === "?" && !isTypingTarget(e.target)) {
+    e.preventDefault();
+    toggleOverlay(els.shortcutsOverlay);
+    return;
+  }
+  // ESC → close the overlay (if open) OR close the history popover.
+  if (e.key === "Escape") {
+    if (els.shortcutsOverlay && !els.shortcutsOverlay.hidden) {
+      closeOverlay(els.shortcutsOverlay);
+      return;
+    }
+    if (els.historyPopover && !els.historyPopover.hidden) {
+      closeHistoryPopover();
+      return;
+    }
   }
 });
+
+function toggleOverlay(overlay) {
+  if (!overlay) return;
+  if (overlay.hidden) openOverlay(overlay);
+  else closeOverlay(overlay);
+}
+
+function openOverlay(overlay) {
+  if (!overlay || !overlay.hidden) return;
+  overlay.hidden = false;
+  // Focus trap: remember what had focus, then move it to the first focusable.
+  overlay._lastFocus = document.activeElement;
+  const focusables = overlay.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  if (focusables.length) focusables[0].focus();
+  // Trap Tab within the overlay.
+  overlay._tabTrap = (e) => {
+    if (e.key !== "Tab" || overlay.hidden) return;
+    const items = Array.from(
+      overlay.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )
+    ).filter((el) => !el.disabled && el.offsetParent !== null);
+    if (items.length === 0) return;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  };
+  overlay.addEventListener("keydown", overlay._tabTrap);
+}
+
+function closeOverlay(overlay) {
+  if (!overlay || overlay.hidden) return;
+  overlay.hidden = true;
+  if (overlay._tabTrap) {
+    overlay.removeEventListener("keydown", overlay._tabTrap);
+    overlay._tabTrap = null;
+  }
+  if (overlay._lastFocus && typeof overlay._lastFocus.focus === "function") {
+    overlay._lastFocus.focus();
+    overlay._lastFocus = null;
+  }
+}
+
+function initKeyboardShortcuts() {
+  // Wire overlay close buttons (backdrop + explicit Close button share data-close-overlay).
+  if (els.shortcutsOverlay) {
+    els.shortcutsOverlay.querySelectorAll("[data-close-overlay]").forEach((el) => {
+      el.addEventListener("click", () => closeOverlay(els.shortcutsOverlay));
+    });
+  }
+}
+
+// ===== Share button =====
+function initShareButton() {
+  if (!els.shareBtn) return;
+  els.shareBtn.addEventListener("click", async () => {
+    const hash = buildShareHash();
+    if (!hash) return;
+    const url = location.origin + location.pathname + location.search + hash;
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Legacy fallback for non-secure contexts.
+      const ta = document.createElement("textarea");
+      ta.value = url;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand("copy"); } catch {}
+      document.body.removeChild(ta);
+    }
+    const prev = els.shareBtn.textContent;
+    els.shareBtn.textContent = "Copied!";
+    setTimeout(() => { els.shareBtn.textContent = prev; }, 1200);
+  });
+}
+
+// ===== Download JSON =====
+function updateDownloadBtn() {
+  if (!els.downloadBtn) return;
+  els.downloadBtn.disabled = !lastResults;
+}
+
+function initDownloadButton() {
+  if (!els.downloadBtn) return;
+  els.downloadBtn.addEventListener("click", () => {
+    if (!lastResults) return;
+    const json = JSON.stringify(lastResults, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    const stamp =
+      d.getFullYear() + pad(d.getMonth() + 1) + pad(d.getDate()) +
+      "-" + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+    a.href = url;
+    a.download = "ckc-results-" + stamp + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    // Revoke on a tick so the download has time to start.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+}
+
+// ===== History popover =====
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(entries) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries));
+  } catch {
+    /* localStorage quota / disabled — silent */
+  }
+}
+
+function addToHistory(value) {
+  if (!value || !value.trim()) return;
+  const entry = { value, ts: Date.now() };
+  let entries = loadHistory();
+  // Dedup: if the exact value already exists, drop the older entry so the new
+  // one floats to the top with a fresh timestamp.
+  entries = entries.filter((e) => e.value !== value);
+  entries.unshift(entry);
+  if (entries.length > HISTORY_MAX) entries = entries.slice(0, HISTORY_MAX);
+  saveHistory(entries);
+  updateHistoryBtn();
+  // If the popover is open, refresh its contents.
+  if (els.historyPopover && !els.historyPopover.hidden) renderHistoryPopover();
+}
+
+function maskForHistory(value) {
+  // First 8 + … + last 4. Used for display-only in the popover list.
+  if (!value) return "";
+  // For multi-line bulk entries, show the first line masked + count.
+  const lines = value.split(/\r\n|\r|\n/).filter((l) => l.trim().length > 0);
+  if (lines.length > 1) {
+    const first = lines[0];
+    const masked = first.length <= 12
+      ? first.slice(0, 2) + "…" + first.slice(-2)
+      : first.slice(0, 8) + "…" + first.slice(-4);
+    return masked + " (+" + (lines.length - 1) + " more)";
+  }
+  const v = value;
+  if (v.length <= 12) return v.slice(0, 2) + "…" + v.slice(-2);
+  return v.slice(0, 8) + "…" + v.slice(-4);
+}
+
+function formatHistoryTime(ts) {
+  const d = new Date(ts);
+  const pad = (n) => String(n).padStart(2, "0");
+  return (
+    pad(d.getMonth() + 1) + "/" + pad(d.getDate()) +
+    " " + pad(d.getHours()) + ":" + pad(d.getMinutes())
+  );
+}
+
+function updateHistoryBtn() {
+  if (!els.historyBtn) return;
+  const count = loadHistory().length;
+  els.historyBtn.textContent = count > 0 ? "History (" + count + ")" : "History";
+  els.historyBtn.disabled = count === 0;
+}
+
+function renderHistoryPopover() {
+  const pop = els.historyPopover;
+  if (!pop) return;
+  pop.innerHTML = "";
+  const entries = loadHistory();
+  if (entries.length === 0) {
+    const empty = document.createElement("div");
+    empty.className = "history-popover__empty";
+    empty.textContent = "No classifications yet.";
+    pop.appendChild(empty);
+    return;
+  }
+  const list = document.createElement("div");
+  list.className = "history-popover__list";
+  list.setAttribute("role", "list");
+  for (const e of entries) {
+    const item = document.createElement("button");
+    item.type = "button";
+    item.className = "history-popover__item";
+    item.setAttribute("role", "listitem");
+    const val = document.createElement("span");
+    val.className = "history-popover__item-value";
+    val.textContent = maskForHistory(e.value);
+    const time = document.createElement("span");
+    time.className = "history-popover__item-time";
+    time.textContent = formatHistoryTime(e.ts);
+    item.appendChild(val);
+    item.appendChild(time);
+    item.addEventListener("click", () => {
+      els.input.value = e.value;
+      updateBulkIndicator();
+      syncHashFromState();
+      closeHistoryPopover();
+      els.input.focus();
+    });
+    list.appendChild(item);
+  }
+  pop.appendChild(list);
+
+  const footer = document.createElement("div");
+  footer.className = "history-popover__footer";
+  const clear = document.createElement("button");
+  clear.type = "button";
+  clear.className = "btn btn--ghost btn--sm";
+  clear.textContent = "Clear history";
+  clear.addEventListener("click", () => {
+    if (!window.confirm("Clear all classification history? This cannot be undone.")) return;
+    saveHistory([]);
+    renderHistoryPopover();
+    updateHistoryBtn();
+    closeHistoryPopover();
+  });
+  footer.appendChild(clear);
+  pop.appendChild(footer);
+}
+
+function openHistoryPopover() {
+  const pop = els.historyPopover;
+  const btn = els.historyBtn;
+  if (!pop || !btn) return;
+  renderHistoryPopover();
+  pop.hidden = false;
+  btn.setAttribute("aria-expanded", "true");
+  // Click-outside to close.
+  document.addEventListener("click", historyOutsideClick, true);
+}
+
+function closeHistoryPopover() {
+  const pop = els.historyPopover;
+  const btn = els.historyBtn;
+  if (!pop) return;
+  pop.hidden = true;
+  if (btn) btn.setAttribute("aria-expanded", "false");
+  document.removeEventListener("click", historyOutsideClick, true);
+}
+
+function historyOutsideClick(e) {
+  const pop = els.historyPopover;
+  const btn = els.historyBtn;
+  if (!pop || pop.hidden) return;
+  if (pop.contains(e.target) || (btn && btn.contains(e.target))) return;
+  closeHistoryPopover();
+}
+
+function initHistoryPopover() {
+  if (!els.historyBtn) return;
+  els.historyBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (els.historyPopover.hidden) openHistoryPopover();
+    else closeHistoryPopover();
+  });
+}

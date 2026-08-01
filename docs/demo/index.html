@@ -100,8 +100,15 @@
           </select>
         </label>
 
+        <div class="input-panel__history">
+          <button id="history-btn" type="button" class="btn btn--ghost btn--sm" aria-haspopup="true" aria-expanded="false" aria-controls="history-popover" disabled>History</button>
+          <div id="history-popover" class="history-popover" role="dialog" aria-label="Recent classifications" hidden></div>
+        </div>
+
         <button id="classify-btn" class="btn btn--primary" disabled>Classify</button>
-        <button id="clear-btn"  class="btn btn--ghost">Clear</button>
+        <button id="share-btn"    class="btn btn--ghost" type="button" disabled>Copy share link</button>
+        <button id="download-btn" class="btn btn--ghost" type="button" disabled>Download JSON</button>
+        <button id="clear-btn"    class="btn btn--ghost">Clear</button>
       </div>
 
       <p id="example-note" class="input-panel__note" hidden></p>
@@ -145,6 +152,9 @@
     <div class="footer__credit">
       Powered by Pyodide + <a href="https://github.com/JordanNewell/crypto-key-classifier">crypto-key-classifier</a> <span class="version">v0.6.1</span>
     </div>
+    <div class="footer__hint">
+      Press <kbd>?</kbd> for shortcuts
+    </div>
   </footer>
 
   <script src="https://cdn.jsdelivr.net/pyodide/v0.27.2/full/pyodide.js"></script>
@@ -158,6 +168,25 @@
       });
     }
   </script>
+
+  <!-- Keyboard shortcuts overlay (? to toggle, ESC to close). -->
+  <div id="shortcuts-overlay" class="overlay" hidden>
+    <div class="overlay__backdrop" data-close-overlay></div>
+    <div class="overlay__panel" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title">
+      <h2 id="shortcuts-title" class="overlay__title">Shortcuts</h2>
+      <dl class="overlay__list">
+        <dt><kbd>Ctrl</kbd>+<kbd>Enter</kbd></dt>
+        <dd>Classify the current input</dd>
+        <dt><kbd>Ctrl</kbd>+<kbd>K</kbd></dt>
+        <dd>Focus and select the key input</dd>
+        <dt><kbd>?</kbd></dt>
+        <dd>Toggle this overlay</dd>
+        <dt><kbd>Esc</kbd></dt>
+        <dd>Close this overlay</dd>
+      </dl>
+      <button type="button" class="btn btn--ghost btn--sm" data-close-overlay>Close</button>
+    </div>
+  </div>
 <footer class="newell-site-footer">
   <div class="nsf-inner">
     <div class="nsf-brand">
