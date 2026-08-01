@@ -157,6 +157,12 @@ Validators auto-discover via `src/ckc/validators/__init__.py` — drop a new `fo
 
 See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.1-pypi`.
 
+## Community
+
+- [Contributing](CONTRIBUTING.md) — dev setup, validator recipe, code style, PR expectations
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Contributor Covenant 2.1
+- [Security](SECURITY.md) — report vulnerabilities privately, not via public issues
+
 ## License
 
 [MIT](LICENSE) © Jordan Newell

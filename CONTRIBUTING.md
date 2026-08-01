@@ -45,6 +45,16 @@ The validator joins the pipeline on next run — no registration step.
   headline-first, one-line "what + why"
 - Comments explain *why*, not *what* — see `SIGNATURE.md`
 
+## Principles
+
+- **DRY** — duplicate logic across validators belongs in a shared helper
+  under `src/ckc/` (see `cosmo.py`, `repairs.py`). If you copy-paste a
+  crypto primitive, extract it first.
+- **YAGNI** — don't add recovery primitives, CLI flags, or output fields
+  speculatively. Wait for a concrete bug or feature request before
+  generalizing.
+- Keep diffs small and reviewable. One logical change per PR.
+
 ## Commits
 
 - All commits must be signed (Ed25519 key in `SIGNATURE.md`).
