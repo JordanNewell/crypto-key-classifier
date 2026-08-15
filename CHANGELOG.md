@@ -4,6 +4,30 @@ All notable changes to `crypto-key-classifier` are documented here. Tags follow 
 
 ## [Unreleased]
 
+### Added
+- Pyodide web demo (`docs/demo/`) — live in-browser classification with NEWELL branding, shareable URLs, history panel, JSON download, keyboard shortcuts, and bulk mode.
+- `--version` flag to CLI for runtime version display.
+- Pyproject metadata: `classifiers`, `[project.urls]`, and keywords populated for PyPI discovery.
+- 9 Stellar-related regression tests for edge cases in cross-chain validation.
+- OSS hygiene files: `SECURITY.md`, `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md` with project-specific guidance.
+- GitHub repository topics: crypto, bitcoin, ethereum, solana, cosmos, bip39, key-recovery, blockchain, forensics, cli.
+- Community files: `FUNDING.yml`, `SUPPORT.md`, `AUTHORS.md`, `DISCUSSION.md`, `GOVERNANCE.md`.
+- NEWELL branding across demo and docs: neon-green brutalist styles, OG images, social meta, favicon suite.
+- Playwright CI smoke test for demo deployment.
+- Dependabot auto-merge workflow for dependency updates.
+
+### Changed
+- Version bump `0.6.1` → `0.7.0`.
+- `License` classifier dropped from `pyproject.toml` (PEP 639 — `license = "MIT"` in `[project]` is canonical).
+- Demo refreshes with NEWELL v3 neon-border per-letter favicon design.
+- README: hero banner, terminal screenshot, live Pyodide demo link at top.
+- CI: demo-smoke test now required; bump-badge workflow auto-updates static release badge.
+
+### Fixed
+- Demo font CDN switched from Fontsource to Google Fonts (Fontsource blocked by ORB).
+- Cosmos address rendering and repair trace display in demo.
+- FUNDING.yml `buy_me_a_coffee` key fixed to spec.
+
 ## [v0.6.1-pypi] — 2026-07-19
 
 ### Added
