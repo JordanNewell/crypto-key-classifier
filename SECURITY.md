@@ -12,6 +12,13 @@ exchange out of band.
 
 **Do not open a public GitHub issue** for security reports.
 
+If you have a PGP key, encrypt your report. GPG fingerprint of the project's
+reporting key:
+
+```
+67567DC5E7C5353F85F2AF0DAC05D3F3E0EFA32A
+```
+
 ## Response timeline
 
 | Step | Target |
