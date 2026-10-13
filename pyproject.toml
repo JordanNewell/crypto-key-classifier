@@ -8,7 +8,7 @@ version = "0.7.0"
 description = "Classify any crypto-key string (BTC/ETH/SOL/Cosmos + more) with aggressive recovery from corruption"
 readme = "README.md"
 requires-python = ">=3.10"
-license = "MIT"
+license = "BUSL-1.1"
 authors = [{ name = "Jordan Newell" }]
 dependencies = [
     "base58>=2.1.1",
