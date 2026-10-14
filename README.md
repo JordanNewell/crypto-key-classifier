@@ -3,7 +3,7 @@
   <br>
   <a href="https://pypi.org/project/crypto-key-classifier/"><img src="https://img.shields.io/pypi/v/crypto-key-classifier?logo=pypi&logoColor=white" alt="PyPI version"></a>
   <a href="https://pypi.org/project/crypto-key-classifier/"><img src="https://img.shields.io/pypi/pyversions/crypto-key-classifier?logo=python&logoColor=white" alt="Python versions"></a>
-  <a href="./LICENSE"><img src="https://img.shields.io/pypi/l/crypto-key-classifier?color=blue" alt="License: MIT"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-BUSL--1.1-blue" alt="License: BUSL-1.1"></a>
   <a href="https://github.com/JordanNewell/crypto-key-classifier/actions/workflows/ci.yml"><img src="https://github.com/JordanNewell/crypto-key-classifier/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
   <a href="https://github.com/JordanNewell/crypto-key-classifier/releases"><img src="https://img.shields.io/badge/release-0.6.1-blue
 </p>
@@ -157,9 +157,15 @@ Validators auto-discover via `src/ckc/validators/__init__.py` — drop a new `fo
 
 See [`CHANGELOG.md`](CHANGELOG.md) for releases `v0.1.0-mvp` → `v0.6.1-pypi`.
 
+## Community
+
+- [Contributing](CONTRIBUTING.md) — dev setup, validator recipe, code style, PR expectations
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Contributor Covenant 2.1
+- [Security](SECURITY.md) — report vulnerabilities privately, not via public issues
+
 ## License
 
-[MIT](LICENSE) © Jordan Newell
+[BUSL-1.1](LICENSE) © Jordan Newell — source-available; converts to MIT on 2030-10-12.
 
 
 <p align="right">

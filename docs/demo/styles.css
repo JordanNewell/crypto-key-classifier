@@ -369,6 +369,160 @@ a:hover { color: var(--color-accent); }
   border-color: var(--color-muted);
 }
 .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn--sm {
+  font-size: 11px;
+  padding: 3px var(--space-3);
+  letter-spacing: 0.5px;
+}
+
+/* ===== History popover ===== */
+.input-panel__history {
+  position: relative;
+  display: inline-block;
+}
+.history-popover {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  left: 0;
+  z-index: 20;
+  min-width: 320px;
+  max-width: 380px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  /* Subtle elevation via solid layering, not blur/glow.
+     Surface tokens keep the panel readable on OLED black. */
+}
+.history-popover__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.history-popover__item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  text-align: left;
+  width: 100%;
+  font-family: var(--font-mono);
+  color: var(--color-text);
+  transition: border-color 120ms ease, background 120ms ease;
+}
+.history-popover__item:hover,
+.history-popover__item:focus-visible {
+  border-color: var(--color-primary);
+  background: var(--color-background);
+  outline: none;
+}
+.history-popover__item-value {
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--color-text);
+}
+.history-popover__item-time {
+  font-size: 10px;
+  color: var(--color-muted);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.history-popover__empty {
+  padding: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-muted);
+  text-align: center;
+}
+.history-popover__footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+}
+
+/* ===== Keyboard shortcuts overlay ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+.overlay[hidden] { display: none; }
+.overlay__backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-background);
+  /* Solid scrim — NO opacity tricks that would tint it; keep it opaque for focus trap legibility. */
+}
+.overlay__panel {
+  position: relative;
+  z-index: 1;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  max-width: 480px;
+  width: 100%;
+}
+.overlay__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 20px;
+  letter-spacing: -0.5px;
+  margin: 0 0 var(--space-4);
+  color: var(--color-text);
+}
+.overlay__list {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-mono);
+  font-size: 13px;
+}
+.overlay__list > dt {
+  color: var(--color-text);
+  white-space: nowrap;
+}
+.overlay__list > dd {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+/* kbd — keyboard glyph. NO box-shadow glow; just a bordered chip. */
+kbd {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text);
+  background: var(--color-background);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 1px var(--space-2);
+  letter-spacing: 0.5px;
+}
+
+/* ===== Footer hint ===== */
+.footer__hint {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-muted);
+  letter-spacing: 0.5px;
+}
 
 /* ===== Results ===== */
 .results:empty::before {
@@ -623,3 +777,55 @@ a:hover { color: var(--color-accent); }
 .footer__credit { text-align: center; }
 .footer a { color: var(--color-primary); }
 .footer .version { color: var(--color-text); }
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  .page {
+    padding: var(--space-5) var(--space-4) var(--space-7);
+  }
+  .hero__title { font-size: 30px; }
+  .masthead { padding: var(--space-3) var(--space-4); }
+  .footer { padding: var(--space-4); }
+  .footer__links { gap: var(--space-3); }
+  /* Input row collapses to a vertical stack on mobile so long example
+     labels don't blow out the viewport width. */
+  .input-panel__row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .input-panel__row > * { width: 100%; }
+  .input-panel__example { flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+  .input-panel__example select { width: 100%; max-width: 100%; }
+  /* The select's intrinsic width comes from long option text; let it shrink
+     and show a horizontal scrollbar inside the control instead of forcing
+     the whole page wider. */
+  #example-select {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* History popover: anchor to the right edge of the row instead of the
+     button so it doesn't get clipped off-screen on narrow viewports. */
+  .history-popover {
+    left: auto;
+    right: 0;
+    min-width: unset;
+    max-width: calc(100vw - var(--space-8));
+  }
+  .input-panel__history {
+    position: static;
+  }
+  /* Match-card grid: collapse the label column on mobile. */
+  .match-card__row {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);
+  }
+  .match-card__alt {
+    grid-template-columns: auto 1fr;
+  }
+  .match-card__alt > .match-card__copy {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}

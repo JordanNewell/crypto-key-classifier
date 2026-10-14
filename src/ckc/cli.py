@@ -13,9 +13,17 @@ from __future__ import annotations
 
 import argparse
 import sys
+from importlib.metadata import PackageNotFoundError, version
 
 from ckc.pipeline import Config, classify
 from ckc.reporter import render_json_array, render_rich, render_terse
+
+
+def _resolve_version() -> str:
+    try:
+        return version("crypto-key-classifier")
+    except PackageNotFoundError:
+        return "0.0.0+unknown"
 
 
 def _ensure_utf8_stdout() -> None:
@@ -34,6 +42,11 @@ def _build_parser() -> argparse.ArgumentParser:
         prog="classify-key",
         description="Classify any crypto-key string (BTC/ETH/SOL/Cosmos + more) "
                     "with aggressive recovery from corruption.",
+    )
+    p.add_argument(
+        "--version",
+        action="version",
+        version=f"crypto-key-classifier {_resolve_version()}",
     )
     p.add_argument("inputs", nargs="*", help="input string(s) to classify")
     p.add_argument("--file", "-f", help="read inputs from file (one per line)")
